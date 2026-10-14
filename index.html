@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart e-Learning RSON</title>
+    <!-- ไอคอนแอปบนหน้าจอมือถือ (เหมือนหน้า GitHub เดิม) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/MG30HF30/be-creative.png">
+    <link rel="icon" href="https://i.postimg.cc/MG30HF30/be-creative.png">
     <script>
     /* แสดงข้อผิดพลาดของหน้าเว็บบนจอ (ช่วยหาสาเหตุเมื่อหน้าเว็บไม่ตอบสนอง) */
     window.addEventListener('error', function (e) {
@@ -35,6 +40,36 @@
         var b = document.getElementById('jsErrBox'); if (b) { var v = document.createElement('div'); v.style.cssText = 'font-size:11px;color:#64748b;margin-top:4px'; v.textContent = 'รุ่นไฟล์: 2026-10-14 v3'; b.appendChild(v); }
         if (typeof updateUI !== 'function') window.dispatchEvent(new ErrorEvent('error', { message: 'โค้ดในไฟล์ index.html ไม่ครบ หรือมีส่วนที่ผิดพลาด (ไม่พบฟังก์ชัน updateUI) — กรุณาวางไฟล์ index.html ใหม่ทั้งไฟล์ แล้ว Deploy อีกครั้ง' }));
     });
+    </script>
+    <script>
+    /* ===== 🌐 เปิดจาก GitHub Pages: ส่งคำสั่งไป Apps Script ผ่าน fetch (ไม่ต้องใช้บัญชี Google ในเบราว์เซอร์)
+       ใช้รูปแบบคำสั่งเดิม google.script.run.withSuccessHandler(...).withFailureHandler(...).ชื่อฟังก์ชัน(...) ได้เหมือนเดิม
+       ถ้าเปิดผ่าน Apps Script โดยตรง (มี google.script อยู่แล้ว) ส่วนนี้จะไม่ทำงาน ===== */
+    (function () {
+        if (typeof google !== 'undefined' && google.script) return;
+        var API = ['https:', '', 'script.google.com', 'macros', 's', 'AKfycbyQkOYz_N7lz0tcBT8_MM0VaIYfVXRVENqZNtEU95C74lurcQo_dE1-Yuz0ULyD-wrP', 'exec'].join('/');
+        function runner(ok, fail, user) {
+            return new Proxy({}, { get: function (_, name) {
+                if (name === 'withSuccessHandler') return function (f) { return runner(f, fail, user); };
+                if (name === 'withFailureHandler') return function (f) { return runner(ok, f, user); };
+                if (name === 'withUserObject') return function (o) { return runner(ok, fail, o); };
+                if (typeof name !== 'string') return undefined;
+                return function () {
+                    var args = Array.prototype.slice.call(arguments);
+                    var onErr = function (msg) { var e = new Error(msg); if (fail) fail(e, user); else console.error(name, msg); };
+                    fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: name, args: args }) })
+                        .then(function (r) { return r.json(); })
+                        .then(function (j) { if (j && j.ok) { if (ok) ok(j.result, user); } else onErr((j && j.error) || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์'); })
+                        .catch(function () { onErr('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่'); });
+                };
+            } });
+        }
+        window.google = { script: {
+            get run() { return runner(null, null, undefined); },
+            url: { getLocation: function (cb) { var p = {}; new URLSearchParams(location.search).forEach(function (v, k) { p[k] = v; }); cb({ parameter: p, hash: location.hash.slice(1) }); } },
+            history: { replace: function () { try { history.replaceState(null, '', location.pathname); } catch (e) {} } }
+        } };
+    })();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
