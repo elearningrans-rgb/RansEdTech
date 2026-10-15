@@ -2940,7 +2940,7 @@
     }
     /* ===== เพิ่มหลายรายวิชาจากไฟล์ทีเดียว (คอลัมน์เดียวกับฟอร์มเพิ่มรายวิชา · แยกแท็บให้อัตโนมัติตามระดับการศึกษา) ===== */
     const CM_UP_HEAD = ['ระดับการศึกษา', 'ปีการศึกษา', 'ภาคเรียน', 'ชั้นปี', 'สาขาวิชา', 'ประเภทภาคการศึกษา', 'รหัสวิชา', 'ชื่อวิชา'];
-    let cmUpRows = [];
+    let cmUpRows = [], cmUpTb = null, cmUpOld = [];
     function cmUpPanel() {
         return `<div class="mt-4 pt-4 border-t border-dashed border-green-300">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -2949,6 +2949,10 @@
             </div>
             <p class="text-xs text-gray-500 mb-2">ไฟล์ .xlsx / .xls / .csv ใช้หัวคอลัมน์: <b>${CM_UP_HEAD.join(' · ')}</b> — ต้องกรอกตามกติกาเดียวกับฟอร์มด้านบน (ป.ตรี ต้องมีสาขาและชั้นปี / ป.โท-เอก ต้องมีสาขา / ป.โท ระบุ ภาคปกติ หรือ ภาคพิเศษ ถ้าเว้นว่าง = ใช้ได้ทั้งสองภาค) ดูค่าที่ใช้ได้ในแท็บ "รายการที่ใช้ได้" ของไฟล์ตัวอย่าง · ช่องที่เว้นว่างจะใช้ค่าที่เลือกไว้ด้านบนแทน · ระบบแยกลงแท็บตามระดับให้เอง</p>
             <input type="file" id="cmUpFile" accept=".xlsx,.xls,.csv" class="cm-in cursor-pointer" onchange="cmUpRead(this.files[0])">
+            <label class="flex items-start gap-2 mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 cursor-pointer">
+                <input type="checkbox" id="cmUpReplace" class="mt-0.5 w-4 h-4 accent-amber-600" onchange="if (cmUpTb) cmUpParse(cmUpTb)">
+                <span><b>แทนที่รายวิชาเดิม</b> — ลบวิชาเดิมในระบบที่ ระดับการศึกษา + ปีการศึกษา + ภาคเรียน ตรงกับในไฟล์ออกก่อน แล้วใส่ชุดใหม่แทน (ใช้เมื่อต้องการแก้รหัส/ชื่อวิชาทั้งชุด) · ไม่ติ๊ก = เพิ่มต่อท้าย ข้ามวิชาที่มีแล้ว</span>
+            </label>
             <div id="cmUpMsg" class="mt-2 text-sm"></div>
             <div id="cmUpPreview" class="hidden mt-2 max-h-72 overflow-auto border rounded-lg text-xs bg-white" style="width:0;min-width:100%"></div>
             <div id="cmUpBtnWrap" class="hidden flex justify-end mt-3">
@@ -2994,7 +2998,7 @@
         return STD_LEVELS_UI.find(l => l.toLowerCase() === t.toLowerCase()) || (CM_SHEET_BY_LEVEL[t] ? t : '');
     }
     function cmUpRead(file) {
-        cmUpRows = [];
+        cmUpRows = []; cmUpTb = null; cmUpOld = [];
         ['cmUpPreview', 'cmUpBtnWrap'].forEach(id => document.getElementById(id).classList.add('hidden'));
         cmUpMsg('');
         if (!file) return;
@@ -3010,6 +3014,8 @@
         reader.readAsArrayBuffer(file);
     }
     function cmUpParse(tb) {
+        cmUpTb = tb; cmUpOld = [];
+        const replace = !!(document.getElementById('cmUpReplace') || {}).checked;
         let h = -1;
         for (let i = 0; i < Math.min(10, tb.length); i++) if ((tb[i] || []).some(c => String(c).includes('รหัส'))) { h = i; break; }
         if (h === -1) return cmUpMsg('ไม่พบหัวคอลัมน์ "รหัสวิชา" ในไฟล์ — กดดาวน์โหลดไฟล์ตัวอย่างเพื่อดูรูปแบบ', true);
@@ -3047,7 +3053,7 @@
             if (/^ตัวอย่าง/.test(d.name)) d.skip = 'แถวตัวอย่าง';
             else if (lvRaw && !d.level) d.err = 'ระดับการศึกษาไม่ถูกต้อง "' + lvRaw + '"';
             else if ((d.err = cmCheck(d))) {}
-            else if (have[k]) d.skip = 'มีในระบบแล้ว';
+            else if (have[k] && !replace) d.skip = 'มีในระบบแล้ว';
             else if (seen[k]) d.skip = 'ซ้ำในไฟล์';
             if (d.skip !== 'แถวตัวอย่าง') seen[k] = true;
             d.sheetName = d.level ? cmAutoSheet(d.level) : '';
@@ -3055,6 +3061,10 @@
         });
         if (!cmUpRows.length) return cmUpMsg('ไม่พบข้อมูลรายวิชาในไฟล์', true);
         const ok = cmUpRows.filter(d => !d.err && !d.skip), bad = cmUpRows.filter(d => d.err).length, skip = cmUpRows.filter(d => d.skip).length;
+        // โหมดแทนที่: วิชาเดิมที่ ระดับ + ปีการศึกษา + ภาคเรียน ตรงกับแถวที่จะนำเข้า จะถูกลบก่อน
+        const scope = {}; ok.forEach(d => { scope[[d.level, d.year, d.semester].join('|')] = true; });
+        if (replace) cmUpOld = allCoursesData.filter(c => scope[[c.level, String(c.year || '').trim(), String(c.semester || '').trim()].join('|')]);
+        const scopeTxt = Object.keys(scope).map(k => { const x = k.split('|'); return x[0] + ' ปี ' + x[1] + ' ภาคเรียน ' + x[2]; });
         const bySheet = {}; ok.forEach(d => bySheet[d.sheetName] = (bySheet[d.sheetName] || 0) + 1);
         const st = d => d.err ? `<span class="text-red-600 font-bold">✗ ${ciEsc(d.err)}</span>` : d.skip ? `<span class="text-gray-400">ข้าม (${d.skip})</span>` : '<span class="text-green-700 font-bold">✓ พร้อม</span>';
         const box = document.getElementById('cmUpPreview');
@@ -3064,7 +3074,8 @@
                 [d.level, d.year, d.semester, d.yearLevel, d.dept, d.programType, d.id, d.name].map(v => `<td class="p-2 whitespace-nowrap">${ciEsc(v)}</td>`).join('') + '</tr>').join('') + '</tbody></table>';
         box.classList.remove('hidden');
         cmUpMsg(`พบ ${cmUpRows.length} แถว · <b class="text-green-700">พร้อมนำเข้า ${ok.length}</b>` + (skip ? ` · ข้าม ${skip}` : '') + (bad ? ` · <b class="text-red-600">ผิดพลาด ${bad} (จะไม่นำเข้า)</b>` : '') +
-            (ok.length ? '<br><span class="text-xs text-gray-500">ลงแท็บ: ' + Object.keys(bySheet).map(s => `${ciEsc(s)} ${bySheet[s]} วิชา`).join(' · ') + '</span>' : ''));
+            (ok.length ? '<br><span class="text-xs text-gray-500">ลงแท็บ: ' + Object.keys(bySheet).map(s => `${ciEsc(s)} ${bySheet[s]} วิชา`).join(' · ') + '</span>' : '') +
+            (replace && ok.length ? `<br><span class="text-amber-700 font-bold">⚠ แทนที่: จะลบวิชาเดิม ${cmUpOld.length} วิชา</span> <span class="text-xs text-gray-500">(${ciEsc(scopeTxt.join(' · '))})</span>` : ''));
         document.getElementById('cmUpBtnWrap').classList.toggle('hidden', !ok.length);
         document.getElementById('cmUpBtn').innerHTML = `<i class="fas fa-upload mr-1"></i> นำเข้า ${ok.length} วิชา`;
     }
@@ -3073,18 +3084,22 @@
         if (!ok.length || !isGAS) return;
         const groups = {}; ok.forEach(d => (groups[d.sheetName] = groups[d.sheetName] || []).push(d));
         const names = Object.keys(groups);
-        if (!await uiConfirm(`ยืนยันนำเข้า ${ok.length} รายวิชา?\n\n` + names.map(n => `• ${n}: ${groups[n].length} วิชา`).join('\n'))) return;
+        const replace = !!(document.getElementById('cmUpReplace') || {}).checked, old = replace ? cmUpOld.slice() : [];
+        if (!await uiConfirm((old.length ? `⚠ แทนที่: ลบรายวิชาเดิม ${old.length} วิชา แล้วนำเข้าใหม่ ${ok.length} รายวิชา?\n\n` : `ยืนยันนำเข้า ${ok.length} รายวิชา?\n\n`) + names.map(n => `• ${n}: ${groups[n].length} วิชา`).join('\n') + (old.length ? '\n\nวิชาที่ลบแล้วกู้คืนไม่ได้' : ''))) return;
         const btn = document.getElementById('cmUpBtn'); btn.disabled = true;
-        cmBusy(true, 'กำลังนำเข้ารายวิชา...');
-        let added = 0, skipped = 0;
+        cmBusy(true, old.length ? 'กำลังลบรายวิชาเดิม...' : 'กำลังนำเข้ารายวิชา...');
+        let added = 0, skipped = 0, removed = 0;
         const next = i => {
-            if (i >= names.length) return cmReload(`นำเข้าสำเร็จ ${added} รายวิชา` + (skipped ? ` (ข้ามรายการซ้ำ ${skipped})` : ''));
+            if (i >= names.length) return cmReload((removed ? `ลบวิชาเดิม ${removed} · ` : '') + `นำเข้าสำเร็จ ${added} รายวิชา` + (skipped ? ` (ข้ามรายการซ้ำ ${skipped})` : ''));
             const table = [CM_UP_HEAD].concat(groups[names[i]].map(d => [d.level, d.year, d.semester, d.yearLevel, d.dept, d.programType, d.id, d.name]));
             google.script.run.withSuccessHandler(r => { added += r.added; skipped += r.skipped; next(i + 1); })
                 .withFailureHandler(e => { btn.disabled = false; cmFail({ message: (added ? `นำเข้าไปแล้ว ${added} วิชา แต่แท็บ "${names[i]}" ผิดพลาด: ` : '') + ((e && e.message) || e) }); })
                 .importCourses({ table: table, sheetName: names[i], mode: 'append' }, adminToken);
         };
-        next(0);
+        if (!old.length) return next(0);
+        google.script.run.withSuccessHandler(r => { removed = r.deleted.length; cmBusy(true, 'กำลังนำเข้ารายวิชา...'); next(0); })
+            .withFailureHandler(e => { btn.disabled = false; cmFail({ message: 'ลบรายวิชาเดิมไม่สำเร็จ (ยังไม่ได้นำเข้า): ' + ((e && e.message) || e) }); })
+            .courseDeleteMany(old.map(cmRef), adminToken);
     }
     function cmEdit(i) { cm.editKey = cmKey(cm.rows[i]); cm.adding = false; cmRender(); }
     function cmCancel() { cm.adding = false; cm.editKey = null; cmRender(); }
