@@ -725,8 +725,8 @@
                         <div id="deptFilterBox"><label class="field-label" for="filterDept" id="filterDeptLabel">สาขาวิชาการพยาบาล</label><select id="filterDept" onchange="runFilter()" class="form-input"><option value="">-- ทุกสาขา --</option></select></div>
                         <div id="programTypeWrap"><label class="field-label">ประเภทภาคการศึกษา <span class="req">*</span></label>
                             <div class="grid grid-cols-2 gap-2">
-                                <label class="checkbox-card"><input type="radio" name="programType" value="ภาคปกติ"> <span>ภาคปกติ</span></label>
-                                <label class="checkbox-card"><input type="radio" name="programType" value="ภาคพิเศษ"> <span>ภาคพิเศษ</span></label>
+                                <label class="checkbox-card"><input type="radio" name="programType" value="ภาคปกติ" onchange="runFilter()"> <span>ภาคปกติ</span></label>
+                                <label class="checkbox-card"><input type="radio" name="programType" value="ภาคพิเศษ" onchange="runFilter()"> <span>ภาคพิเศษ</span></label>
                             </div></div>
                     </div>
                 </div>
@@ -1665,6 +1665,10 @@
     const isGradLevel = l => /^ปริญญา(โท|เอก)/.test(l || '');
     const needSection = l => isBachLevel(l) && l !== 'ปริญญาตรี inter';        // ป.ตรี inter ไม่มีกลุ่มนักศึกษา
     const needProgramType = l => isGradLevel(l) && l !== 'ปริญญาเอก inter';    // ป.เอก inter ไม่มีประเภทภาคการศึกษา
+    const PROGRAM_TYPES = ['ภาคปกติ', 'ภาคพิเศษ'];
+    const GRAD_CORE_DEPT = 'วิชาแกน วิชาเลือก และวิทยานิพนธ์';   // วิชาของทุกสาขา (แสดงให้ทุกสาขาในหัวข้อ 4)
+    /** แปลงค่าที่พิมพ์ในไฟล์ (ปกติ / ภาคพิเศษ ฯลฯ) เป็นค่ามาตรฐาน · ว่าง = ใช้ได้ทั้งสองภาค · null = ค่าไม่ถูกต้อง */
+    const progTypeStd = v => { const t = String(v || '').replace(/\s+/g, ''); if (!t || t === '-' || /ทั้ง|ปกติ.*พิเศษ/.test(t)) return ''; return /ปกติ/.test(t) ? 'ภาคปกติ' : /พิเศษ/.test(t) ? 'ภาคพิเศษ' : null; };
     /** เทียบชื่อสาขาแบบไม่สนคำนำหน้า "สาขาวิชา" ช่องว่าง เครื่องหมาย / และคำว่า "และ" (สะกดผิด เวว → เวช) */
     const deptKeyUI = v => String(v || '').replace(/^สาขาวิชา/, '').replace(/เวว/g, 'เวช').replace(/และ|[\s,]/g, '').split('/').join('');
     const semLabel = v => v ? 'ภาคเรียนที่ ' + v : 'ไม่ระบุภาคเรียน';
@@ -1723,10 +1727,14 @@
         const yl = bach ? document.getElementById('filterYearLevel').value : '';
         const s = document.getElementById('filterSemester').value;
         const y = document.getElementById('filterYear').value;
+        // ป.โท: ภาคปกติ / ภาคพิเศษ (วิชาที่ไม่ระบุภาค แสดงได้ทั้งสองภาค) · วิชาแกน/วิชาเลือก/วิทยานิพนธ์ แสดงให้ทุกสาขา
+        const pt = grad && needProgramType(l) ? (document.querySelector('input[name="programType"]:checked')?.value || '') : '';
+        const coreKey = deptKeyUI(GRAD_CORE_DEPT);
         // วิชาที่ไม่ได้ระบุภาคเรียน/ปีการศึกษาในชีต (เช่น ป.โท) แสดงได้ทุกภาคเรียน/ทุกปี
         const filtered = allCoursesData.filter(c =>
             (!l || c.level === l) &&
-            (!dp || deptKeyUI(c.dept) === deptKeyUI(dp)) &&
+            (!dp || deptKeyUI(c.dept) === deptKeyUI(dp) || deptKeyUI(c.dept) === coreKey) &&
+            (!pt || !String(c.programType || '').trim() || String(c.programType).trim() === pt) &&
             (!yl || String(c.yearLevel) === String(yl)) &&
             (!s || !String(c.semester || '').trim() || String(c.semester).trim() === s) &&
             (!y || !String(c.year || '').trim() || String(c.year).trim() === y)
@@ -1744,7 +1752,8 @@
             const sem = String(c.semester || '').trim(), yr = String(c.yearLevel || '').trim();
             const key = bach ? (yr || '9') + '|' + (sem || '9') : (sem || '9');
             const label = bach ? semLabel(sem) + (yr ? ' ปี ' + yr : '') : semLabel(sem);
-            (groups[key] = groups[key] || { label: label, list: [] }).list.push(c);
+            const g = (groups[key] = groups[key] || { label: label, list: [] });
+            if (!g.list.some(x => x.id === c.id && x.name === c.name && x.dept === c.dept)) g.list.push(c);   // วิชาเดียวกันที่มีทั้งภาคปกติ/พิเศษ แสดงครั้งเดียว
         });
         const opt = c => `<option value="${ciEsc(c.id + ' - ' + c.name)}">${ciEsc(c.id)} ${ciEsc(c.name)}${c.dept && !bach ? ' [' + ciEsc(c.dept) + ']' : ''}</option>`;
         sel.innerHTML = '<option value="">-- คลิกเลือกวิชา --</option>' + Object.keys(groups).sort((a, b) => a.localeCompare(b, 'th', { numeric: true }))
@@ -2692,7 +2701,7 @@
     const cm = { page: 1, yl: '', sel: new Set(), editKey: null, adding: false, rows: [] };
     let cmSearchTimer = null, cmToastTimer = null;
     const cmKey = c => c.sheetName + '|' + c.rowIdx;
-    const cmRef = c => ({ sheetName: c.sheetName, rowIdx: c.rowIdx, id: c.id, semester: c.semester, year: c.year });
+    const cmRef = c => ({ sheetName: c.sheetName, rowIdx: c.rowIdx, id: c.id, semester: c.semester, year: c.year, dept: c.dept || '', programType: c.programType || '' });
     const cmV = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
 
     function cmShowView(which) {
@@ -2791,7 +2800,7 @@
             <td class="p-3"><div class="font-bold text-indigo-600">${ciEsc(c.sheetName)}</div><div class="text-xs text-gray-400">${ciEsc(c.level)}</div></td>
             <td class="p-3 whitespace-nowrap">${c.yearLevel ? 'ปีที่ ' + ciEsc(c.yearLevel) : dash}</td>
             <td class="p-3 whitespace-nowrap">${c.semester ? 'ภาคเรียนที่ ' + ciEsc(c.semester) : '-'} / ${ciEsc(c.year) || '-'}</td>
-            <td class="p-3 text-xs">${ciEsc(c.dept) || dash}</td>
+            <td class="p-3 text-xs">${ciEsc(c.dept) || dash}${c.programType ? '<div class="mt-1"><span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-bold">' + ciEsc(c.programType) + '</span></div>' : ''}</td>
             <td class="p-3 font-bold whitespace-nowrap">${ciEsc(c.id)}</td>
             <td class="p-3" style="min-width:10rem">${ciEsc(c.name)}</td>
             <td class="p-3 text-right whitespace-nowrap">
@@ -2802,7 +2811,7 @@
 
     /** ตัวเลือก "สาขาวิชา" ตามระดับ — ใช้รายการเดียวกับหัวข้อ 4.2 ของฟอร์มส่งคำขอ (ไม่ตรงกันผู้ขอจะหาวิชาไม่เจอ) */
     const cmDeptListFor = l => isBachLevel(l) ? BACH_DEPTS : isGradLevel(l) ? MASTER_DEPTS : null;
-    function cm42Html(l, dept, yl) {
+    function cm42Html(l, dept, yl, pt) {
         const fld = (label, html) => `<div><label class="block text-xs font-bold text-gray-600 mb-1">${label}</label>${html}</div>`;
         const R = ' <span class="text-red-500">*</span>';
         const opts = (list, v, ph, num) => { v = String(v || ''); const extra = v && !list.includes(v) ? `<option value="${ciEsc(v)}" selected>⚠ ${ciEsc(v)} (ไม่ตรงรายการ)</option>` : '';
@@ -2811,7 +2820,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fld('สาขาวิชาการพยาบาล' + R, `<select id="cmE_dept" class="cm-in">${opts(BACH_DEPTS, dept, '-- เลือกสาขาวิชา --', true)}</select>`)}
             ${fld('ชั้นปี' + R, `<select id="cmE_yl" class="cm-in"><option value="">-- เลือกชั้นปี --</option>${YEAR_LEVELS.map(y => `<option value="${y}"${String(yl || '') === y ? ' selected' : ''}>ปีที่ ${y}</option>`).join('')}</select>`)}</div></div>`;
         if (isGradLevel(l)) return `<div class="p-3 rounded-xl bg-violet-50 border border-violet-100"><div class="text-xs font-bold text-violet-800 mb-2"><i class="fas fa-user-tie mr-1"></i> 4.2 ข้อมูลสำหรับนักศึกษาบัณฑิตศึกษา</div>
-            ${fld('สาขาวิชาการพยาบาล ' + (/^ปริญญาเอก/.test(l) ? 'ป.เอก' : 'ป.โท') + R, `<select id="cmE_dept" class="cm-in">${opts(MASTER_DEPTS, dept, '-- เลือกสาขาวิชา --')}</select>`)}</div>`;
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fld('สาขาวิชาการพยาบาล ' + (/^ปริญญาเอก/.test(l) ? 'ป.เอก' : 'ป.โท') + R, `<select id="cmE_dept" class="cm-in">${opts(MASTER_DEPTS, dept, '-- เลือกสาขาวิชา --')}</select>`)}
+            ${needProgramType(l) ? fld('ประเภทภาคการศึกษา', `<select id="cmE_pt" class="cm-in">${opts(PROGRAM_TYPES, pt, 'ใช้ได้ทั้งภาคปกติและภาคพิเศษ')}</select>`) : ''}</div></div>`;
         if (!l) return '<div class="text-xs text-gray-400 p-3 rounded-xl bg-gray-50 border border-dashed">4.2 จะแสดงหลังเลือกระดับการศึกษา</div>';
         return `<div class="p-3 rounded-xl bg-gray-50 border">${fld('สาขาวิชา (ถ้ามี)', `<input id="cmE_dept" class="cm-in" value="${ciEsc(dept)}" placeholder="สาขาวิชา" list="cmDeptList">`)}</div>`;
     }
@@ -2819,7 +2829,7 @@
         const l = cmV('cmE_level'), box = document.getElementById('cmE_42');
         if (box) {
             const curDept = cmV('cmE_dept'), list = cmDeptListFor(l);
-            box.innerHTML = cm42Html(l, list && !list.includes(curDept) ? '' : curDept, cmV('cmE_yl'));
+            box.innerHTML = cm42Html(l, list && !list.includes(curDept) ? '' : curDept, cmV('cmE_yl'), cmV('cmE_pt'));
         }
         if (cm.adding) cmShowAutoSheet();
     }
@@ -2832,6 +2842,7 @@
         if (list && !d.dept) return 'ไม่ได้ระบุสาขาวิชา';
         if (list && !list.includes(d.dept)) return 'สาขาวิชาไม่ตรงกับรายการในหัวข้อ 4.2 "' + d.dept + '"';
         if (isBachLevel(d.level) && !YEAR_LEVELS.includes(String(d.yearLevel || ''))) return 'ปริญญาตรีต้องระบุชั้นปี 1–4';
+        if (d.programType && (!needProgramType(d.level) || !PROGRAM_TYPES.includes(d.programType))) return 'ประเภทภาคการศึกษาใช้เฉพาะ ป.โท และต้องเป็น ภาคปกติ หรือ ภาคพิเศษ';
         if (!d.id) return 'ไม่มีรหัสวิชา';
         if (!d.name) return 'ไม่มีชื่อวิชา';
         return '';
@@ -2861,7 +2872,7 @@
                 ${fld('ปีการศึกษา' + R, sel('year', d.year, [['', '-- เลือกปีการศึกษา --']].concat(yearOptions().map(v => [v, v]))))}
                 ${fld('ภาคเรียน' + R, sel('sem', d.semester, [['', '-- เลือกภาคเรียน --'], ['1', 'ภาคเรียนที่ 1'], ['2', 'ภาคเรียนที่ 2']]))}
             </div>
-            <div id="cmE_42" class="mb-3">${cm42Html(d.level, d.dept, d.yearLevel)}</div>
+            <div id="cmE_42" class="mb-3">${cm42Html(d.level, d.dept, d.yearLevel, d.programType)}</div>
             ${head('4.3 รายวิชา', 'fa-book')}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 ${fld('รหัสวิชา' + R, inp('id', d.id, 'เช่น RANS 101'))}
@@ -2928,7 +2939,7 @@
         el.innerHTML = sh ? 'บันทึกลงแท็บ: <b>' + ciEsc(sh) + '</b>' + (allCoursesData.some(c => c.sheetName === sh) ? '' : ' (สร้างใหม่)') : 'เลือกระดับการศึกษา แล้วระบบจะเลือกแท็บให้อัตโนมัติ';
     }
     /* ===== เพิ่มหลายรายวิชาจากไฟล์ทีเดียว (คอลัมน์เดียวกับฟอร์มเพิ่มรายวิชา · แยกแท็บให้อัตโนมัติตามระดับการศึกษา) ===== */
-    const CM_UP_HEAD = ['ระดับการศึกษา', 'ปีการศึกษา', 'ภาคเรียน', 'ชั้นปี', 'สาขาวิชา', 'รหัสวิชา', 'ชื่อวิชา'];
+    const CM_UP_HEAD = ['ระดับการศึกษา', 'ปีการศึกษา', 'ภาคเรียน', 'ชั้นปี', 'สาขาวิชา', 'ประเภทภาคการศึกษา', 'รหัสวิชา', 'ชื่อวิชา'];
     let cmUpRows = [];
     function cmUpPanel() {
         return `<div class="mt-4 pt-4 border-t border-dashed border-green-300">
@@ -2936,7 +2947,7 @@
                 <div class="font-bold text-indigo-700 text-sm"><i class="fas fa-file-arrow-up mr-1"></i> หรือ อัปโหลดไฟล์ เพิ่มหลายวิชาทีเดียว</div>
                 <button type="button" onclick="cmUpTemplate()" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 text-xs"><i class="fas fa-download mr-1"></i> ดาวน์โหลดไฟล์ตัวอย่าง</button>
             </div>
-            <p class="text-xs text-gray-500 mb-2">ไฟล์ .xlsx / .xls / .csv ใช้หัวคอลัมน์: <b>${CM_UP_HEAD.join(' · ')}</b> — ต้องกรอกตามกติกาเดียวกับฟอร์มด้านบน (ป.ตรี ต้องมีสาขาและชั้นปี / ป.โท-เอก ต้องมีสาขา) ดูค่าที่ใช้ได้ในแท็บ "รายการที่ใช้ได้" ของไฟล์ตัวอย่าง · ช่องที่เว้นว่างจะใช้ค่าที่เลือกไว้ด้านบนแทน · ระบบแยกลงแท็บตามระดับให้เอง</p>
+            <p class="text-xs text-gray-500 mb-2">ไฟล์ .xlsx / .xls / .csv ใช้หัวคอลัมน์: <b>${CM_UP_HEAD.join(' · ')}</b> — ต้องกรอกตามกติกาเดียวกับฟอร์มด้านบน (ป.ตรี ต้องมีสาขาและชั้นปี / ป.โท-เอก ต้องมีสาขา / ป.โท ระบุ ภาคปกติ หรือ ภาคพิเศษ ถ้าเว้นว่าง = ใช้ได้ทั้งสองภาค) ดูค่าที่ใช้ได้ในแท็บ "รายการที่ใช้ได้" ของไฟล์ตัวอย่าง · ช่องที่เว้นว่างจะใช้ค่าที่เลือกไว้ด้านบนแทน · ระบบแยกลงแท็บตามระดับให้เอง</p>
             <input type="file" id="cmUpFile" accept=".xlsx,.xls,.csv" class="cm-in cursor-pointer" onchange="cmUpRead(this.files[0])">
             <div id="cmUpMsg" class="mt-2 text-sm"></div>
             <div id="cmUpPreview" class="hidden mt-2 max-h-72 overflow-auto border rounded-lg text-xs bg-white" style="width:0;min-width:100%"></div>
@@ -2947,15 +2958,16 @@
     function cmUpTemplate() {
         if (typeof XLSX === 'undefined') return cmToast('ตัวสร้างไฟล์ยังโหลดไม่เสร็จ กรุณาลองอีกครั้ง', true);
         const ws = XLSX.utils.aoa_to_sheet([CM_UP_HEAD,
-            ['ปริญญาตรี', '2569', '1', '2', 'สาขาวิชาการพยาบาลพื้นฐาน', 'RANS 101', 'ตัวอย่างชื่อวิชา ป.ตรี'],
-            ['ปริญญาโท', '2569', '1', '', 'สาขาวิชาการพยาบาลเด็ก', 'RANS 601', 'ตัวอย่างชื่อวิชา ป.โท'],
-            ['ปริญญาเอก inter', '2569', '2', '', 'วิชาแกน วิชาเลือก และวิทยานิพนธ์', 'RANS 701', 'ตัวอย่างชื่อวิชา ป.เอก inter']]);
+            ['ปริญญาตรี', '2569', '1', '2', 'สาขาวิชาการพยาบาลพื้นฐาน', '', 'RANS 101', 'ตัวอย่างชื่อวิชา ป.ตรี'],
+            ['ปริญญาโท', '2569', '1', '', 'สาขาวิชาการพยาบาลเด็ก', 'ภาคปกติ', 'รมพด 520', 'ตัวอย่างชื่อวิชา ป.โท ภาคปกติ'],
+            ['ปริญญาโท', '2569', '1', '', 'วิชาแกน วิชาเลือก และวิทยานิพนธ์', 'ภาคพิเศษ', 'รมพย 603', 'ตัวอย่างวิชาแกน ป.โท ภาคพิเศษ (แสดงให้ทุกสาขา)'],
+            ['ปริญญาเอก inter', '2569', '2', '', 'วิชาแกน วิชาเลือก และวิทยานิพนธ์', '', 'RANS 701', 'ตัวอย่างชื่อวิชา ป.เอก inter']]);
         // แท็บ "รายการที่ใช้ได้" — ค่าเดียวกับหัวข้อ 4 ของฟอร์มส่งคำขอ
         const n = Math.max(STD_LEVELS_UI.length, BACH_DEPTS.length, MASTER_DEPTS.length);
-        const ref = [['ระดับการศึกษา', 'ภาคเรียน', 'ชั้นปี (เฉพาะ ป.ตรี)', 'สาขาวิชา ป.ตรี / ป.ตรี inter', 'สาขาวิชา ป.โท / ป.เอก (รวม inter)']];
-        for (let i = 0; i < n; i++) ref.push([STD_LEVELS_UI[i] || '', ['1', '2'][i] || '', YEAR_LEVELS[i] || '', BACH_DEPTS[i] || '', MASTER_DEPTS[i] || '']);
-        const ws2 = XLSX.utils.aoa_to_sheet(ref); ws2['!cols'] = [18, 10, 18, 42, 42].map(w => ({ wch: w }));
-        ws['!cols'] = [18, 12, 10, 8, 40, 14, 40].map(w => ({ wch: w }));
+        const ref = [['ระดับการศึกษา', 'ภาคเรียน', 'ชั้นปี (เฉพาะ ป.ตรี)', 'สาขาวิชา ป.ตรี / ป.ตรี inter', 'สาขาวิชา ป.โท / ป.เอก (รวม inter)', 'ประเภทภาคการศึกษา (เฉพาะ ป.โท)']];
+        for (let i = 0; i < n; i++) ref.push([STD_LEVELS_UI[i] || '', ['1', '2'][i] || '', YEAR_LEVELS[i] || '', BACH_DEPTS[i] || '', MASTER_DEPTS[i] || '', PROGRAM_TYPES.concat(['(เว้นว่าง = ทั้งสองภาค)'])[i] || '']);
+        const ws2 = XLSX.utils.aoa_to_sheet(ref); ws2['!cols'] = [18, 10, 18, 42, 42, 30].map(w => ({ wch: w }));
+        ws['!cols'] = [18, 12, 10, 8, 40, 18, 14, 40].map(w => ({ wch: w }));
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'รายวิชา'); XLSX.utils.book_append_sheet(wb, ws2, 'รายการที่ใช้ได้');
         XLSX.writeFile(wb, 'แบบฟอร์มนำเข้ารายวิชา.xlsx');
     }
@@ -2990,12 +3002,14 @@
         const col = f => hd.findIndex(f);
         const ix = { id: col(x => x.includes('รหัส')), name: col(x => x.includes('ชื่อวิชา')), level: col(x => x.includes('ระดับ')),
             semester: col(x => x.includes('ภาคเรียน') || x.includes('เทอม')), year: col(x => x.includes('ปีการศึกษา') || (x.includes('ปี') && !x.includes('ชั้นปี'))),
-            dept: col(x => x.includes('สาขา')), yearLevel: col(x => x.includes('ชั้นปี') || x === 'ชั้น') };
+            dept: col(x => x.includes('สาขา')), yearLevel: col(x => x.includes('ชั้นปี') || x === 'ชั้น'),
+            programType: col(x => x.includes('ประเภท') || x.includes('ภาคปกติ') || x.includes('ภาคพิเศษ')) };
         const g = (r, f) => ix[f] !== -1 ? String(r[ix[f]] == null ? '' : r[ix[f]]).trim() : '';
         // ค่าที่เลือกไว้ในฟอร์มด้านบน ใช้เติมช่องที่ว่าง
         const def = { level: cmV('cmE_level'), year: cmV('cmE_year'), semester: cmV('cmE_sem'), yearLevel: cmV('cmE_yl'), dept: cmV('cmE_dept') };
         const stdDepts = BACH_DEPTS.concat(MASTER_DEPTS);
-        const have = {}; allCoursesData.forEach(c => { have[[c.level, c.id, c.semester, c.year].join('|').toLowerCase()] = true; });
+        const keyOf = c => [c.level, c.id, c.semester, c.year, c.dept, c.programType || ''].join('|').toLowerCase();
+        const have = {}; allCoursesData.forEach(c => { have[keyOf(c)] = true; });
         const seen = {};
         cmUpRows = tb.slice(h + 1).filter(r => (r || []).some(c => String(c).trim() !== '')).map(r => {
             const lvRaw = g(r, 'level');
@@ -3004,13 +3018,17 @@
                 year: (g(r, 'year').match(/\d{4}/) || [def.year])[0] || '',
                 semester: (g(r, 'semester').match(/\d/) || [def.semester])[0] || '',
                 yearLevel: (g(r, 'yearLevel').match(/\d/) || [def.yearLevel])[0] || '',
-                dept: g(r, 'dept') || def.dept, id: g(r, 'id'), name: g(r, 'name')
+                dept: g(r, 'dept') || def.dept, id: g(r, 'id'), name: g(r, 'name'),
+                programType: progTypeStd(g(r, 'programType'))   // ไม่เติมจากด้านบน: เว้นว่าง = ใช้ได้ทั้งสองภาค
             };
             // สาขา: เทียบกับรายการของหัวข้อ 4.2 ตามระดับ (ป.ตรี / ป.โท-เอก) แล้วแปลงเป็นชื่อมาตรฐาน
             const dl = cmDeptListFor(d.level) || stdDepts, dk = deptKeyUI(d.dept);
             const sd = dk && (dl.find(x => deptKeyUI(x) === dk) || (dk.length > 3 && dl.find(x => deptKeyUI(x).endsWith(dk)))); if (sd) d.dept = sd;
             if (!isBachLevel(d.level)) d.yearLevel = '';   // ชั้นปีใช้เฉพาะ ป.ตรี
-            const k = [d.level, d.id, d.semester, d.year].join('|').toLowerCase();
+            const ptRaw = g(r, 'programType');
+            if (d.programType === null) d.programType = ptRaw;   // ค่าไม่ถูกต้อง ให้ cmCheck แจ้ง
+            else if (d.programType && !needProgramType(d.level)) d.programType = '';   // ใส่มาในระดับที่ไม่ใช้ → ไม่เก็บ
+            const k = keyOf(d);
             if (lvRaw && !d.level) d.err = 'ระดับการศึกษาไม่ถูกต้อง "' + lvRaw + '"';
             else if ((d.err = cmCheck(d))) {}
             else if (have[k]) d.skip = 'มีในระบบแล้ว';
@@ -3027,7 +3045,7 @@
         box.innerHTML = '<table class="w-full text-left"><thead class="bg-gray-100 sticky top-0"><tr>' +
             ['สถานะ', 'ลงแท็บ'].concat(CM_UP_HEAD).map(c => `<th class="p-2 whitespace-nowrap">${c}</th>`).join('') + '</tr></thead><tbody>' +
             cmUpRows.map(d => `<tr class="border-b ${d.err ? 'bg-red-50' : ''}"><td class="p-2 whitespace-nowrap">${st(d)}</td><td class="p-2 whitespace-nowrap">${ciEsc(d.sheetName)}</td>` +
-                [d.level, d.year, d.semester, d.yearLevel, d.dept, d.id, d.name].map(v => `<td class="p-2 whitespace-nowrap">${ciEsc(v)}</td>`).join('') + '</tr>').join('') + '</tbody></table>';
+                [d.level, d.year, d.semester, d.yearLevel, d.dept, d.programType, d.id, d.name].map(v => `<td class="p-2 whitespace-nowrap">${ciEsc(v)}</td>`).join('') + '</tr>').join('') + '</tbody></table>';
         box.classList.remove('hidden');
         cmUpMsg(`พบ ${cmUpRows.length} แถว · <b class="text-green-700">พร้อมนำเข้า ${ok.length}</b>` + (skip ? ` · ข้าม ${skip}` : '') + (bad ? ` · <b class="text-red-600">ผิดพลาด ${bad} (จะไม่นำเข้า)</b>` : '') +
             (ok.length ? '<br><span class="text-xs text-gray-500">ลงแท็บ: ' + Object.keys(bySheet).map(s => `${ciEsc(s)} ${bySheet[s]} วิชา`).join(' · ') + '</span>' : ''));
@@ -3045,7 +3063,7 @@
         let added = 0, skipped = 0;
         const next = i => {
             if (i >= names.length) return cmReload(`นำเข้าสำเร็จ ${added} รายวิชา` + (skipped ? ` (ข้ามรายการซ้ำ ${skipped})` : ''));
-            const table = [CM_UP_HEAD].concat(groups[names[i]].map(d => [d.level, d.year, d.semester, d.yearLevel, d.dept, d.id, d.name]));
+            const table = [CM_UP_HEAD].concat(groups[names[i]].map(d => [d.level, d.year, d.semester, d.yearLevel, d.dept, d.programType, d.id, d.name]));
             google.script.run.withSuccessHandler(r => { added += r.added; skipped += r.skipped; next(i + 1); })
                 .withFailureHandler(e => { btn.disabled = false; cmFail({ message: (added ? `นำเข้าไปแล้ว ${added} วิชา แต่แท็บ "${names[i]}" ผิดพลาด: ` : '') + ((e && e.message) || e) }); })
                 .importCourses({ table: table, sheetName: names[i], mode: 'append' }, adminToken);
@@ -3077,9 +3095,10 @@
     function cmSave() {
         const d = {
             level: cmV('cmE_level'), yearLevel: cmV('cmE_yl'), semester: cmV('cmE_sem'), year: cmV('cmE_year'),
-            dept: cmV('cmE_dept'), id: cmV('cmE_id'), name: cmV('cmE_name')
+            dept: cmV('cmE_dept'), id: cmV('cmE_id'), name: cmV('cmE_name'), programType: cmV('cmE_pt')
         };
         if (!isBachLevel(d.level)) d.yearLevel = '';   // ชั้นปีใช้เฉพาะ ป.ตรี (เหมือนหัวข้อ 4.2)
+        if (!needProgramType(d.level)) d.programType = '';   // ภาคปกติ/ภาคพิเศษ ใช้เฉพาะ ป.โท
         const bad = cmCheck(d);
         if (bad) return cmToast(bad, true);
         if (!isGAS) return;
