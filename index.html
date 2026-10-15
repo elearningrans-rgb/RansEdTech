@@ -1753,9 +1753,9 @@
             const key = bach ? (yr || '9') + '|' + (sem || '9') : (sem || '9');
             const label = bach ? semLabel(sem) + (yr ? ' ปี ' + yr : '') : semLabel(sem);
             const g = (groups[key] = groups[key] || { label: label, list: [] });
-            if (!g.list.some(x => x.id === c.id && x.name === c.name && x.dept === c.dept)) g.list.push(c);   // วิชาเดียวกันที่มีทั้งภาคปกติ/พิเศษ แสดงครั้งเดียว
+            if (!g.list.some(x => x.id === c.id && x.name === c.name)) g.list.push(c);   // วิชาเดียวกัน (หลายสาขา/ทั้งภาคปกติและพิเศษ) แสดงครั้งเดียว
         });
-        const opt = c => `<option value="${ciEsc(c.id + ' - ' + c.name)}">${ciEsc(c.id)} ${ciEsc(c.name)}${c.dept && !bach ? ' [' + ciEsc(c.dept) + ']' : ''}</option>`;
+        const opt = c => `<option value="${ciEsc(c.id + ' - ' + c.name)}">${ciEsc(c.id)} ${ciEsc(c.name)}</option>`;
         sel.innerHTML = '<option value="">-- คลิกเลือกวิชา --</option>' + Object.keys(groups).sort((a, b) => a.localeCompare(b, 'th', { numeric: true }))
             .map(k => `<optgroup label="${ciEsc(groups[k].label)}">${groups[k].list.map(opt).join('')}</optgroup>`).join('');
         if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
