@@ -1726,19 +1726,27 @@
         const dp = grad ? document.getElementById('filterDept').value : '';
         const yl = bach ? document.getElementById('filterYearLevel').value : '';
         const s = document.getElementById('filterSemester').value;
-        const y = document.getElementById('filterYear').value;
+        const y0 = document.getElementById('filterYear').value;
         // ป.โท: ภาคปกติ / ภาคพิเศษ (วิชาที่ไม่ระบุภาค แสดงได้ทั้งสองภาค) · วิชาแกน/วิชาเลือก/วิทยานิพนธ์ แสดงให้ทุกสาขา
         const pt = grad && needProgramType(l) ? (document.querySelector('input[name="programType"]:checked')?.value || '') : '';
         const coreKey = deptKeyUI(GRAD_CORE_DEPT);
         // วิชาที่ไม่ได้ระบุภาคเรียน/ปีการศึกษาในชีต (เช่น ป.โท) แสดงได้ทุกภาคเรียน/ทุกปี
-        const filtered = allCoursesData.filter(c =>
+        const cand = allCoursesData.filter(c =>
             (!l || c.level === l) &&
             (!dp || deptKeyUI(c.dept) === deptKeyUI(dp) || deptKeyUI(c.dept) === coreKey) &&
             (!pt || !String(c.programType || '').trim() || String(c.programType).trim() === pt) &&
             (!yl || String(c.yearLevel) === String(yl)) &&
             (!s || !String(c.semester || '').trim() || String(c.semester).trim() === s) &&
-            (!y || !String(c.year || '').trim() || String(c.year).trim() === y)
+            (!y0 || !String(c.year || '').trim() || Number(String(c.year).trim()) <= Number(y0))
         );
+        // ปีการศึกษาที่ยังไม่ได้นำเข้ารายวิชา (ทั้งหมดหรือบางส่วน) → ใช้รายวิชาของปีล่าสุดก่อนหน้า
+        // ส่วนที่นำเข้าปีใหม่แล้วใช้ชุดใหม่ ส่วนที่ยังไม่ได้นำเข้าใช้ชุดเดิมต่อ
+        // ป.ตรี แยกตามภาคเรียน/ชั้นปี · บัณฑิตศึกษา แยกตามสาขา/ภาคเรียน/ประเภทภาค
+        const grpKey = c => (bach ? [c.level, String(c.semester || '').trim(), String(c.yearLevel || '').trim()]
+            : [c.level, deptKeyUI(c.dept), String(c.semester || '').trim(), String(c.programType || '').trim()]).join('|');
+        const bestYear = {};
+        cand.forEach(c => { const yy = Number(String(c.year || '').trim()) || 0, k = grpKey(c); if (yy > (bestYear[k] || 0)) bestYear[k] = yy; });
+        const filtered = cand.filter(c => { const yy = Number(String(c.year || '').trim()) || 0; return !yy || yy === bestYear[grpKey(c)]; });
         const sel = document.getElementById('courseSelect'), cur = sel.value;
         if (!coursesLoaded && isGAS) { sel.innerHTML = '<option value="">⏳ กำลังโหลดรายวิชา...</option>'; return; }
         if (!filtered.length) {
@@ -1752,12 +1760,14 @@
             const sem = String(c.semester || '').trim(), yr = String(c.yearLevel || '').trim();
             const key = bach ? (yr || '9') + '|' + (sem || '9') : (sem || '9');
             const label = bach ? semLabel(sem) + (yr ? ' ปี ' + yr : '') : semLabel(sem);
-            const g = (groups[key] = groups[key] || { label: label, list: [] });
+            const g = (groups[key] = groups[key] || { label: label, list: [], ys: [] });
+            const cy = String(c.year || '').trim(); if (cy && g.ys.indexOf(cy) === -1) g.ys.push(cy);
             if (!g.list.some(x => x.id === c.id && x.name === c.name)) g.list.push(c);   // วิชาเดียวกัน (หลายสาขา/ทั้งภาคปกติและพิเศษ) แสดงครั้งเดียว
         });
         const opt = c => `<option value="${ciEsc(c.id + ' - ' + c.name)}">${ciEsc(c.id)} ${ciEsc(c.name)}</option>`;
         sel.innerHTML = '<option value="">-- คลิกเลือกวิชา --</option>' + Object.keys(groups).sort((a, b) => a.localeCompare(b, 'th', { numeric: true }))
-            .map(k => `<optgroup label="${ciEsc(groups[k].label)}">${groups[k].list.map(opt).join('')}</optgroup>`).join('');
+            .map(k => { const g = groups[k], old = y0 && g.ys.length && g.ys.indexOf(y0) === -1 ? g.ys.sort().join(', ') : '';
+                return `<optgroup label="${ciEsc(g.label + (old ? ' (รายวิชาตามหลักสูตรปีการศึกษา ' + old + ')' : ''))}">${g.list.map(opt).join('')}</optgroup>`; }).join('');
         if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
     }
 
