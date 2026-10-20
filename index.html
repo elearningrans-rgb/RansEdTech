@@ -2452,6 +2452,7 @@
             rm.names = (res && res.adminNames) || {};
             admSetWho();
             rm.me = (res && res.me) || currentAdminUser;
+            rm.isHead = !!(res && res.isHead);
             rmFillFilters();
             rmRender();
         }).withFailureHandler(srvErr()).getAdminRequests(adminToken);
@@ -2526,6 +2527,8 @@
             const nFiles = (r.files || '').split('\n').filter(x => x.trim().startsWith('http')).length;
             const hasNote = r.staffNote || r.internalNote;
             const stCls = RM_ST_CLS[r.status] || 'st-pending';
+            // สิทธิ์: หัวหน้าทุกงาน · คนอื่นเฉพาะงานของตน (งานที่ยังไม่มอบหมาย ทุกคนจัดการได้ ยกเว้นลบ)
+            const can = rm.isHead || !r.assignee || r.assignee === rm.me, canDel = rm.isHead || (!!r.assignee && r.assignee === rm.me);
             const pct = r.status === 'เสร็จสิ้น' ? 100 : r.status === 'กำลังดำเนินการ' ? (Number(r.progress) > 0 && Number(r.progress) < 100 ? Number(r.progress) : 50) : 0;
             let html = `<tr class="border-b st-row ${stCls} ${rowCls}">
                 <td class="p-3 text-xs whitespace-nowrap">${ciEsc(r.date)}<div class="text-gray-400">${ciEsc(r.reqId)}</div></td>
@@ -2535,17 +2538,17 @@
                 <td class="p-2" style="min-width:11rem">
                     <div class="flex items-center justify-between gap-2 mb-1.5"><span class="st-pill">${ciEsc(r.status || 'รออนุมัติ')}</span>${r.status !== 'ยกเลิก' ? `<span class="text-xs font-bold" style="color:var(--st-fg)">${pct}%</span>` : ''}</div>
                     ${r.status !== 'ยกเลิก' ? `<div class="st-prog mb-2"><div style="width:${pct}%"></div></div>` : ''}
-                    <select class="cm-in mb-1" title="${r.status === 'เสร็จสิ้น' ? 'งานเสร็จสิ้นแล้ว (กดเปิดงานอีกครั้งเพื่อแก้ไข)' : 'ผู้รับผิดชอบ'}" onchange="rmAssign(${i}, this)" ${r.status === 'ยกเลิก' || r.status === 'เสร็จสิ้น' ? 'disabled' : ''}>${adminOpts(r.assignee)}</select>
+                    <select class="cm-in mb-1" title="${r.status === 'เสร็จสิ้น' ? 'งานเสร็จสิ้นแล้ว (กดเปิดงานอีกครั้งเพื่อแก้ไข)' : 'ผู้รับผิดชอบ'}" onchange="rmAssign(${i}, this)" ${r.status === 'ยกเลิก' || r.status === 'เสร็จสิ้น' || !can ? 'disabled' : ''}>${adminOpts(r.assignee)}</select>
                     <div class="flex items-center gap-1">
-                        <select id="rmSt_${i}" class="cm-in st-sel ${stCls}" title="${r.status === 'เสร็จสิ้น' ? 'งานเสร็จสิ้นแล้ว (กดเปิดงานอีกครั้งเพื่อแก้ไข)' : 'เปลี่ยนสถานะ'}" data-orig="${ciEsc(r.status)}" onchange="rmStatusChanged(${i})" ${r.status === 'เสร็จสิ้น' ? 'disabled' : ''}>${statusOpts(r.status)}</select>
+                        <select id="rmSt_${i}" class="cm-in st-sel ${stCls}" title="${r.status === 'เสร็จสิ้น' ? 'งานเสร็จสิ้นแล้ว (กดเปิดงานอีกครั้งเพื่อแก้ไข)' : 'เปลี่ยนสถานะ'}" data-orig="${ciEsc(r.status)}" onchange="rmStatusChanged(${i})" ${r.status === 'เสร็จสิ้น' || !can ? 'disabled' : ''}>${statusOpts(r.status)}</select>
                         ${r.status === 'เสร็จสิ้น' ? `<span class="shrink-0 w-8 h-8 inline-flex items-center justify-center text-gray-400" title="งานเสร็จสิ้นแล้ว — กดเปิดงานอีกครั้งเพื่อแก้ไข"><i class="fas fa-lock"></i></span>` : `<button id="rmSave_${i}" onclick="rmSaveStatus(${i})" disabled title="บันทึกสถานะ" class="shrink-0 w-8 h-8 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed"><i class="fas fa-save"></i></button>`}
-                    </div></td>
+                    </div>${!can ? `<div class="text-xs text-gray-400 mt-1" title="เฉพาะผู้ดูแลคำขอหรือหัวหน้าเท่านั้นที่แก้ไขได้"><i class="fas fa-lock mr-1"></i>งานของ ${ciEsc(rmName(r.assignee))}</div>` : ''}</td>
                 <td class="p-3 text-right whitespace-nowrap">
                     <button onclick="rmToggle(${i})" title="รายละเอียด / หมายเหตุ" class="relative w-8 h-8 rounded-lg text-indigo-600 hover:bg-indigo-100"><i class="fas fa-${open ? 'chevron-up' : 'pen-to-square'}"></i>${hasNote ? '<span class="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400"></span>' : ''}</button>
                     ${nFiles ? `<span class="text-xs text-gray-500 mx-1" title="ไฟล์แนบ"><i class="fas fa-paperclip"></i>${nFiles}</span>` : ''}
                     ${r.status === 'เสร็จสิ้น' ? `<button onclick="rmReopen(${i})" title="เปิดงานอีกครั้ง" class="w-8 h-8 rounded-lg text-amber-600 hover:bg-amber-50"><i class="fas fa-rotate-left"></i></button>` : ''}
-                    ${r.status !== 'ยกเลิก' && r.status !== 'เสร็จสิ้น' ? `<button onclick="rmCancel(${i})" title="ยกเลิกคำขอ" class="w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100"><i class="fas fa-ban"></i></button>` : ''}
-                    <button onclick="rmDelete(${i})" title="ลบคำขอ (กรณีกรอกข้อมูลผิด)" class="w-8 h-8 rounded-lg text-red-500 hover:bg-red-50"><i class="fas fa-trash"></i></button>
+                    ${r.status !== 'ยกเลิก' && r.status !== 'เสร็จสิ้น' && can ? `<button onclick="rmCancel(${i})" title="ยกเลิกคำขอ" class="w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100"><i class="fas fa-ban"></i></button>` : ''}
+                    ${canDel ? `<button onclick="rmDelete(${i})" title="ลบคำขอ (กรณีกรอกข้อมูลผิด)" class="w-8 h-8 rounded-lg text-red-500 hover:bg-red-50"><i class="fas fa-trash"></i></button>` : `<span class="inline-flex w-8 h-8 items-center justify-center text-gray-300" title="${r.assignee ? 'ลบได้เฉพาะผู้ดูแลคำขอหรือหัวหน้า' : 'คำขอที่ยังไม่มีผู้ดูแล ลบได้เฉพาะหัวหน้า'}"><i class="fas fa-trash"></i></span>`}
                 </td></tr>`;
             if (open) {
                 const files = (r.files || '').split('\n').filter(x => x.trim().startsWith('http'))
@@ -2560,13 +2563,13 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fas fa-envelope mr-1"></i> หมายเหตุถึงผู้ขอ <span class="font-normal text-gray-400">(แสดงในอีเมลและหน้าติดตามสถานะ)</span></label>
-                            <textarea id="rmNS_${i}" class="rm-ta">${ciEsc(r.staffNote)}</textarea>
+                            <textarea id="rmNS_${i}" class="rm-ta" ${can ? '' : 'readonly'}>${ciEsc(r.staffNote)}</textarea>
                             <label class="flex items-center gap-1.5 text-xs text-gray-600 mt-1 cursor-pointer"><input type="checkbox" id="rmNN_${i}" class="accent-indigo-600" checked> ส่งอีเมลแจ้งผู้ขอเมื่อหมายเหตุเปลี่ยน</label>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1"><i class="fas fa-lock mr-1"></i> บันทึกภายใน <span class="font-normal text-gray-400">(เห็นเฉพาะ Admin)</span></label>
-                            <textarea id="rmNI_${i}" class="rm-ta">${ciEsc(r.internalNote)}</textarea>
-                            <div class="text-right mt-2"><button onclick="rmSaveNotes(${i})" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 text-sm"><i class="fas fa-save mr-1"></i> บันทึกหมายเหตุ</button></div>
+                            <textarea id="rmNI_${i}" class="rm-ta" ${can ? '' : 'readonly'}>${ciEsc(r.internalNote)}</textarea>
+                            <div class="text-right mt-2">${can ? `<button onclick="rmSaveNotes(${i})" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 text-sm"><i class="fas fa-save mr-1"></i> บันทึกหมายเหตุ</button>` : '<span class="text-xs text-gray-400"><i class="fas fa-lock mr-1"></i>แก้ไขได้เฉพาะผู้ดูแลคำขอหรือหัวหน้า</span>'}</div>
                         </div>
                     </div></td></tr>`;
             }
