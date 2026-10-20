@@ -693,6 +693,7 @@
                     <label class="checkbox-card"><input type="radio" name="moodleDetail" value="ขอเพิ่มแบบทดสอบ" onchange="updateUI()"> <span>ขอเพิ่มแบบทดสอบ</span></label>
                     <label class="checkbox-card"><input type="radio" name="moodleDetail" value="ขอข้อมูลการใช้งาน" onchange="updateUI()"> <span>ขอข้อมูล/ผลคะแนน</span></label>
                     <label class="checkbox-card md:col-span-2"><input type="radio" name="moodleDetail" value="ขอเพิ่มรายชื่อ นศ./อาจารย์" onchange="updateUI()"> <span>ขอเพิ่มรายชื่อ นศ./อาจารย์</span></label>
+                    <label class="checkbox-card md:col-span-2"><input type="radio" name="moodleDetail" value="ขอแก้ไขข้อมูล" onchange="updateUI()"> <span>ขอแก้ไขข้อมูล (โครงสร้างเนื้อหา, วัน-เวลา, แบบฝึกหัด, อื่นๆ)</span></label>
                 </div>
             </div>
 
@@ -810,6 +811,21 @@
                     <label class="block text-sm font-bold text-emerald-800 mb-2">ช่องอัปโหลด: ไฟล์เนื้อหา/บทเรียน <span class="text-red-500">*</span> <br><span class="text-xs text-gray-500 font-normal">รองรับ Word (.doc, .docx) และ PDF อัปโหลดได้ไม่เกิน 5 ไฟล์</span></label>
                     <input type="file" id="file_content" accept=".pdf,.doc,.docx" multiple class="form-input bg-emerald-50/30 cursor-pointer" onchange="validateFiles(this, 'content')">
                     <div id="display_file_content" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
+                <div id="boxEdit" class="hidden-step mb-5 p-5 bg-white border-2 border-sky-200 rounded-xl">
+                    <div class="block text-sm font-bold text-sky-800 mb-2">หัวข้อที่ต้องการแก้ไข <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(เลือกได้มากกว่า 1 ข้อ)</span></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                        <label class="checkbox-card"><input type="checkbox" name="editType" value="โครงสร้างเนื้อหา"> <span>โครงสร้างเนื้อหา</span></label>
+                        <label class="checkbox-card"><input type="checkbox" name="editType" value="สลับหัวข้อสอน"> <span>สลับหัวข้อสอน</span></label>
+                        <label class="checkbox-card"><input type="checkbox" name="editType" value="วัน-เวลา เปิด-ปิด (แบบทดสอบ)"> <span>วัน-เวลา เปิด-ปิด (แบบทดสอบ)</span></label>
+                        <label class="checkbox-card"><input type="checkbox" name="editType" value="แบบทดสอบ"> <span>แบบทดสอบ</span></label>
+                    </div>
+                    <label class="block text-sm font-bold text-sky-800 mb-2">รายละเอียดการแก้ไข <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(ระบุหัวข้อ/รายการ ข้อมูลเดิม และข้อมูลใหม่)</span></label>
+                    <textarea id="editDetail" rows="4" class="form-input mb-4" placeholder="เช่น บทที่ 3 แบบฝึกหัดที่ 2: เดิมปิด 10/11/2569 16:00 น. → ใหม่ปิด 17/11/2569 16:00 น.&#10;สลับหัวข้อสัปดาห์ที่ 4 กับสัปดาห์ที่ 5"></textarea>
+                    <label class="block text-sm font-bold text-sky-800 mb-2">ไฟล์ประกอบ (ถ้ามี) <br><span class="text-xs text-gray-500 font-normal">รองรับ Word, Excel และ PDF ไม่เกิน 5 ไฟล์</span></label>
+                    <input type="file" id="file_edit" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple class="form-input bg-sky-50/30 cursor-pointer" onchange="validateFiles(this, 'all')">
+                    <div id="display_file_edit" class="flex flex-wrap gap-2 mt-2"></div>
                 </div>
 
                 <div id="boxUploadQuiz" class="hidden-step mb-5 p-5 bg-white border-2 border-amber-200 rounded-xl">
@@ -1595,7 +1611,7 @@
         document.getElementById('step4').classList.remove('visible-step');
         document.getElementById('step5').classList.remove('visible-step');
 
-        ['boxUploadTQF', 'boxUploadStudents', 'boxUploadContent', 'boxUploadQuiz', 'boxVR'].forEach(id => {
+        ['boxUploadTQF', 'boxUploadStudents', 'boxUploadContent', 'boxUploadQuiz', 'boxVR', 'boxEdit'].forEach(id => {
             document.getElementById(id).classList.remove('visible-step');
         });
 
@@ -1625,6 +1641,8 @@
                 } else if (detail === 'ขอเพิ่มแบบทดสอบ') {
                     document.getElementById('boxUploadQuiz').classList.add('visible-step');
                     if (!document.querySelector('#qzList .qz-item')) qzAdd();
+                } else if (detail === 'ขอแก้ไขข้อมูล') {
+                    document.getElementById('boxEdit').classList.add('visible-step');
                 }
             }
         }
@@ -1803,7 +1821,7 @@
 
     function validateFiles(input, mode) {
         if (!fileStore[input.id]) fileStore[input.id] = [];
-        let maxFiles = (input.id === 'file_content') ? 5 : 2;
+        let maxFiles = (input.id === 'file_content' || input.id === 'file_edit') ? 5 : 2;
 
         if (fileStore[input.id].length + input.files.length > maxFiles) {
             alert(`❌ อัปโหลดได้สูงสุด ${maxFiles} ไฟล์ต่อช่องครับ`); input.value = ''; return;
@@ -2000,6 +2018,15 @@
             contentNote = q.note;
         }
 
+        // ขอแก้ไขข้อมูล: ต้องเลือกหัวข้อและระบุรายละเอียด
+        if (document.getElementById('boxEdit').classList.contains('visible-step')) {
+            const et = [...document.querySelectorAll('input[name="editType"]:checked')].map(x => x.value);
+            const ed = document.getElementById('editDetail');
+            if (!et.length) { document.getElementById('boxEdit').scrollIntoView({ behavior: 'smooth', block: 'center' }); return alert('กรุณาเลือกหัวข้อที่ต้องการแก้ไขอย่างน้อย 1 ข้อ'); }
+            if (!ed.value.trim()) { ed.scrollIntoView({ behavior: 'smooth', block: 'center' }); ed.focus(); return alert('กรุณาระบุรายละเอียดการแก้ไข (ข้อมูลเดิม และข้อมูลใหม่)'); }
+            contentNote = '[แก้ไข: ' + et.join(' / ') + ']\n' + ed.value.trim();
+        }
+
         document.getElementById('loadingText').innerText = "กำลังอัปโหลดไฟล์และส่งคำขอ...";
         document.getElementById('loading').style.display = 'flex';
 
@@ -2008,7 +2035,8 @@
 
         const quizOn = document.getElementById('boxUploadQuiz').classList.contains('visible-step');
         for (const key in fileStore) {
-            if (key.indexOf('file_qz_') === 0 && !quizOn) continue;   // ไฟล์ของแบบทดสอบส่งเฉพาะเมื่อเลือก "ขอเพิ่มแบบทดสอบ"
+            if (key.indexOf('file_qz_') === 0 && !quizOn) continue;
+            if (key === 'file_edit' && !document.getElementById('boxEdit').classList.contains('visible-step')) continue;   // ไฟล์ประกอบการแก้ไข ส่งเฉพาะเมื่อเลือก "ขอแก้ไขข้อมูล"   // ไฟล์ของแบบทดสอบส่งเฉพาะเมื่อเลือก "ขอเพิ่มแบบทดสอบ"
             const pre = key.indexOf('file_qz_') === 0 ? 'รายการ' + qzIndexOf(key.slice(8)) + '_' : '';
             for (let f of fileStore[key]) {
                 const b64 = await toBase64(f);
@@ -2423,7 +2451,7 @@
     // ชื่อที่แสดงของ admin (ชื่อจริงจากแท็บ Admins ถ้ามี)
     function rmName(u) { return (rm.names && rm.names[u]) || u; }
     const RM_SYSTEMS = [['Moodle', 'Moodle'], ['Microsoft Team', 'MS Teams'], ['MUX', 'MUX'], ['แว่น VR', 'แว่น VR']];
-    const RM_DETAILS = ['ขอเปิดรายวิชา', 'ขอเพิ่มเนื้อหา', 'ขอเพิ่มแบบทดสอบ', 'ขอข้อมูลการใช้งาน', 'ขอเพิ่มรายชื่อ นศ./อาจารย์'];
+    const RM_DETAILS = ['ขอเปิดรายวิชา', 'ขอเพิ่มเนื้อหา', 'ขอเพิ่มแบบทดสอบ', 'ขอข้อมูลการใช้งาน', 'ขอเพิ่มรายชื่อ นศ./อาจารย์', 'ขอแก้ไขข้อมูล'];
     function rmLevelText(r) {
         const lv = String(r.level || '');
         if (!lv || lv === '-') return '';
@@ -4383,7 +4411,8 @@
         { key: 'ขอเพิ่มเนื้อหา', label: 'เนื้อหา' },
         { key: 'ขอเพิ่มแบบทดสอบ', label: 'แบบทดสอบ' },
         { key: 'ขอเพิ่มรายชื่อ นศ./อาจารย์', label: 'รายชื่อ' },
-        { key: 'ขอข้อมูลการใช้งาน', label: 'ข้อมูล/คะแนน' }
+        { key: 'ขอข้อมูลการใช้งาน', label: 'ข้อมูล/คะแนน' },
+        { key: 'ขอแก้ไขข้อมูล', label: 'แก้ไขข้อมูล' }
     ];
     let csReqs = [];          // คำขอที่เติมข้อมูลรายวิชาแล้ว
     let csGroups = [];        // ผลจัดกลุ่มล่าสุด (ใช้ส่งออก Excel)
