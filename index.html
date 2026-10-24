@@ -623,7 +623,7 @@
 <main class="container mx-auto px-4 py-8 max-w-5xl flex-grow">
 
     <div id="tab-request" class="glass-card p-6 md:p-10 block">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-indigo-600 pl-4">แบบฟอร์มส่งคำขอใช้บริการ e-Learning / VR</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-indigo-600 pl-4">แบบฟอร์มส่งคำขอใช้บริการ e-Learning</h2>
 
         <ol id="formStepper" class="stepper" aria-label="ขั้นตอนการส่งคำขอ">
             <li data-step="1" data-target="sec1"><span class="dot">1</span><span class="lbl">ผู้ประสานงาน</span></li>
@@ -677,11 +677,10 @@
 
             <div id="sec2" class="bg-white p-6 rounded-2xl border border-gray-200 mb-6 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-800 mb-4"><span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full mr-2">2</span>เลือกระบบ <span class="text-sm font-normal text-red-500">* เลือก 1 ข้อ</span></h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <label class="checkbox-card"><input type="radio" name="system" value="Microsoft Team" onchange="updateUI()"> <span>MS Team</span></label>
                     <label class="checkbox-card"><input type="radio" name="system" value="Moodle" onchange="updateUI()"> <span>Moodle</span></label>
                     <label class="checkbox-card"><input type="radio" name="system" value="MUX" onchange="updateUI()"> <span>MUX</span></label>
-                    <label class="checkbox-card"><input type="radio" name="system" value="แว่น VR" onchange="updateUI()"> <span>แว่น VR</span></label>
                 </div>
             </div>
 
@@ -1192,7 +1191,6 @@
                         <h3 class="font-bold text-lg text-indigo-700"><i class="fas fa-inbox mr-1"></i> คำขอใช้บริการ <span id="rmCount" class="text-sm font-normal text-gray-400"></span></h3>
                         <div class="flex gap-3 items-center">
                             <label class="flex items-center gap-1.5 text-sm font-bold text-gray-600 cursor-pointer select-none"><input type="checkbox" id="rmMine" class="w-4 h-4 accent-indigo-600" onchange="rmGo(1)"> งานของฉัน</label>
-                            <button onclick="vrsOpen()" class="bg-fuchsia-50 text-fuchsia-700 px-3 py-2 rounded-xl font-bold hover:bg-fuchsia-100 text-sm"><i class="fas fa-vr-cardboard"></i> ตั้งค่าแว่น VR</button>
                             <button onclick="asgOpen()" class="bg-indigo-50 text-indigo-700 px-3 py-2 rounded-xl font-bold hover:bg-indigo-100 text-sm"><i class="fas fa-users-gear"></i> ผู้รับผิดชอบตามชั้นปี</button>
                             <button onclick="loadAdminRequests()" class="bg-gray-100 text-gray-700 px-3 py-2 rounded-xl font-bold hover:bg-gray-200 text-sm"><i class="fas fa-rotate"></i> รีเฟรช</button>
                         </div>
@@ -2450,7 +2448,7 @@
     const rm = { data: [], admins: [], names: {}, me: '', chip: 'open', page: 1, open: new Set() };
     // ชื่อที่แสดงของ admin (ชื่อจริงจากแท็บ Admins ถ้ามี)
     function rmName(u) { return (rm.names && rm.names[u]) || u; }
-    const RM_SYSTEMS = [['Moodle', 'Moodle'], ['Microsoft Team', 'MS Teams'], ['MUX', 'MUX'], ['แว่น VR', 'แว่น VR']];
+    const RM_SYSTEMS = [['Moodle', 'Moodle'], ['Microsoft Team', 'MS Teams'], ['MUX', 'MUX']];
     const RM_DETAILS = ['ขอเปิดรายวิชา', 'ขอเพิ่มเนื้อหา', 'ขอเพิ่มแบบทดสอบ', 'ขอข้อมูลการใช้งาน', 'ขอเพิ่มรายชื่อ นศ./อาจารย์', 'ขอแก้ไขข้อมูล'];
     function rmLevelText(r) {
         const lv = String(r.level || '');
@@ -3447,7 +3445,7 @@
         document.getElementById('svBody').innerHTML = `
             ${sv.preview ? '<div class="mb-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex justify-between items-center gap-2 flex-wrap"><span><i class="fas fa-eye mr-1"></i> โหมดตัวอย่าง — ไม่บันทึกคำตอบ</span><button class="btn btn-secondary" style="padding:.35rem .8rem" onclick="switchTab(\'admin\'); loadSurveyAdmin()">กลับหน้าจัดการ</button></div>' : ''}
             <div class="sv-hero mb-5">
-                <div class="text-xs font-bold opacity-80 mb-1"><i class="fas fa-star mr-1"></i> แบบประเมินความพึงพอใจการให้บริการ e-Learning / VR</div>
+                <div class="text-xs font-bold opacity-80 mb-1"><i class="fas fa-star mr-1"></i> แบบประเมินความพึงพอใจการให้บริการ e-Learning</div>
                 <div class="text-xl md:text-2xl font-bold">${ciEsc(d.round.title)}</div>
                 ${d.round.intro && sv.page === 0 ? `<p class="text-sm opacity-90 mt-2 whitespace-pre-line">${ciEsc(d.round.intro)}</p>` : ''}
                 ${sv.page === 0 ? '<p class="text-xs opacity-80 mt-2"><i class="fas fa-user-secret mr-1"></i> ไม่ระบุตัวตน · ใช้เวลาประมาณ 2 นาที</p>' : ''}
@@ -3559,7 +3557,7 @@
             document.getElementById('svBody').innerHTML = `<div class="glass-card p-10 text-center">
                 <div class="ui-modal-icon success" style="width:4.5rem;height:4.5rem;font-size:2rem"><i class="fas fa-heart"></i></div>
                 <div class="text-2xl font-bold text-slate-800">ขอบคุณที่สละเวลาประเมินครับ</div>
-                <p class="text-sm text-gray-500 mt-2">ความคิดเห็นของท่านจะถูกนำไปพัฒนาการให้บริการ e-Learning / VR ให้ดียิ่งขึ้น</p>
+                <p class="text-sm text-gray-500 mt-2">ความคิดเห็นของท่านจะถูกนำไปพัฒนาการให้บริการ e-Learning ให้ดียิ่งขึ้น</p>
                 ${r && r.drawEntry ? '<p class="mt-3 inline-block px-4 py-2 rounded-xl text-sm font-bold text-amber-900" style="background:#fff7ed;border:1px solid #fed7aa"><i class="fas fa-gift mr-1"></i> ท่านมีสิทธิ์ร่วมลุ้นรางวัลแล้ว</p>' : ''}
                 <div class="mt-6"><button class="btn btn-primary" onclick="switchTab('request')">กลับหน้าหลัก</button></div></div>`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4109,7 +4107,7 @@
         const sysSel = document.getElementById('dashFilterSystem');
         const curSys = sysSel.value;
         // แสดงครบทั้ง 4 ระบบเสมอ (แม้ยังไม่มีคำขอ) — ค่า value ตรงกับที่ฟอร์มบันทึกลงชีต
-        const DASH_SYSTEMS = [['Microsoft Team', 'MS Team'], ['Moodle', 'Moodle'], ['MUX', 'MUX'], ['แว่น VR', 'แว่น VR']];
+        const DASH_SYSTEMS = [['Microsoft Team', 'MS Team'], ['Moodle', 'Moodle'], ['MUX', 'MUX']];
         sysSel.innerHTML = '<option value="">-- ทั้งหมด --</option>' + DASH_SYSTEMS.map(([v, t]) => `<option value="${ciEsc(v)}">${ciEsc(t)}</option>`).join('');
         sysSel.value = curSys;
 
@@ -4216,7 +4214,7 @@
     }
 
     function renderDashboard(data) {
-        try { renderVrDash(data); } catch (err) { console.error('renderVrDash', err); }
+        try { document.getElementById('vrDashBox').classList.add('hidden'); } catch (err) {}   // ยกเลิกบริการแว่น VR ในระบบนี้แล้ว
         document.getElementById('dashboardUpdatedAt').innerText = 'อัปเดตล่าสุด: ' + new Date().toLocaleString('th-TH');
 
         // การ์ดสรุป
