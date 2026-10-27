@@ -484,25 +484,6 @@
     </div>
 </div>
 
-<div id="vrsModal" class="ui-modal" aria-hidden="true">
-    <div class="ui-modal-card text-left" role="dialog" aria-modal="true" style="max-width:34rem;max-height:92vh;overflow:auto">
-        <div class="ui-modal-title"><i class="fas fa-vr-cardboard text-fuchsia-500 mr-1"></i> ตั้งค่าแว่น VR</div>
-        <div class="field-label mt-3">คลังแว่นแยกตามวิทยาเขต</div>
-        <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-gray-500"><th class="text-left p-1">วิทยาเขต</th><th class="p-1 w-20">ทั้งหมด</th><th class="p-1 w-20">ไม่พร้อมใช้</th><th class="p-1 w-20">พร้อมใช้</th><th class="w-8"></th></tr></thead><tbody id="vrsSites"></tbody>
-            <tfoot><tr class="font-bold text-gray-700 border-t"><td class="p-1">รวม</td><td class="p-1 text-center" id="vrsSumT"></td><td class="p-1 text-center" id="vrsSumB"></td><td class="p-1 text-center text-emerald-700" id="vrsSumR"></td><td></td></tr></tfoot></table></div>
-        <button type="button" class="mt-1 text-sm font-bold text-indigo-600 hover:underline" onclick="vrsAddSite()"><i class="fas fa-plus"></i> เพิ่มวิทยาเขต</button>
-        <p class="text-xs text-gray-400 mt-1">ไม่พร้อมใช้งาน เช่น ชำรุด ส่งซ่อม แบตเตอรี่เสื่อม · ถ้าวิทยาเขตที่ใช้มีแว่นไม่พอ ระบบจะยืมจากวิทยาเขตอื่นให้อัตโนมัติ (แว่นที่ยืมจะถูกกันไว้ทั้งวันที่ต้นทาง เผื่อเวลาขนย้าย)</p>
-        <div class="mt-4">
-            <div class="field-label">เรื่อง (โปรแกรม VR) ที่ให้เลือก</div>
-            <div id="vrsTopics" class="space-y-2"></div>
-            <div class="flex gap-2 mt-2"><input id="vrsNew" class="form-input flex-1" placeholder="พิมพ์ชื่อเรื่องใหม่" onkeydown="if(event.key==='Enter'){event.preventDefault();vrsAdd();}"><button type="button" class="btn btn-secondary" onclick="vrsAdd()"><i class="fas fa-plus"></i> เพิ่ม</button></div>
-        </div>
-        <div class="ui-modal-actions">
-            <button type="button" class="btn btn-secondary" onclick="svHide('vrsModal')">ปิด</button>
-            <button type="button" class="btn btn-primary" onclick="vrsSave()"><i class="fas fa-save"></i> บันทึก</button>
-        </div>
-    </div>
-</div>
 
 <div id="pwModal" class="ui-modal" aria-hidden="true">
     <div class="ui-modal-card text-left" role="dialog" aria-modal="true" style="max-width:26rem">
@@ -609,7 +590,7 @@
     <!-- เมนูแฮมเบอร์เกอร์ (มือถือ) -->
     <div id="mobileMenu" class="mobile-nav" role="menu" aria-label="เมนูหลัก">
         <div class="mn-head">เมนู</div>
-        <button type="button" id="mbtn-request" class="mtab-btn active" role="menuitem" onclick="switchTab('request')"><i class="fas fa-file-pen"></i><span>ส่งคำขอใช้บริการ<small>Moodle · MS Teams · MUX · แว่น VR</small></span><i class="fas fa-chevron-right chev"></i></button>
+        <button type="button" id="mbtn-request" class="mtab-btn active" role="menuitem" onclick="switchTab('request')"><i class="fas fa-file-pen"></i><span>ส่งคำขอใช้บริการ<small>Moodle · MS Teams · MUX</small></span><i class="fas fa-chevron-right chev"></i></button>
         <button type="button" id="mbtn-track" class="mtab-btn" role="menuitem" onclick="switchTab('track')"><i class="fas fa-magnifying-glass"></i><span>ติดตามสถานะ<small>ค้นหาด้วยอีเมลที่ใช้ส่งคำขอ</small></span><i class="fas fa-chevron-right chev"></i></button>
         <button type="button" id="mbtn-survey" class="mtab-btn mn-sv hidden" role="menuitem" onclick="svOpen()"><i class="fas fa-star"></i><span>ประเมินความพึงพอใจ<small>ใช้เวลาประมาณ 2 นาที</small></span><i class="fas fa-chevron-right chev"></i></button>
         <div class="mn-sep"></div>
@@ -742,46 +723,6 @@
 
             <div id="step5" class="hidden-step bg-slate-50 p-6 rounded-2xl border border-slate-200">
                 <h3 class="text-lg font-bold text-slate-800 mb-4"><span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full mr-2">5</span>เอกสารแนบและการยืนยัน</h3>
-
-                <div id="boxVR" class="hidden-step mb-5 p-5 bg-white border-2 border-fuchsia-200 rounded-xl">
-                    <div class="text-base font-bold text-fuchsia-800 mb-3"><i class="fas fa-vr-cardboard mr-1"></i> รายละเอียดการใช้แว่น VR</div>
-                    <div class="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 leading-relaxed">
-                        <div><i class="fas fa-calendar-check mr-1"></i> ต้องขอใช้<b>ล่วงหน้าอย่างน้อย 7 วันทำการ</b></div>
-                        <div class="mt-1"><i class="fas fa-clock mr-1"></i> ใช้งานได้ใน<b>เวลาราชการ 08:00–16:00 น.</b> (เจ้าหน้าที่ต้องมีเวลาเตรียมและเก็บอุปกรณ์)</div>
-                        <div class="mt-1"><i class="fas fa-door-open mr-1"></i> กรุณา<b>จองห้องให้เรียบร้อยก่อน</b> แล้วแจ้งห้องที่จองไว้ด้านล่าง เพื่อให้เจ้าหน้าที่นำแว่นไปจัดเตรียมไว้ที่ห้อง</div>
-                    </div>
-                    <div id="vrStock" class="mb-4 text-sm text-slate-600"><i class="fas fa-spinner fa-spin"></i> กำลังโหลดข้อมูลแว่น VR...</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                        <div><label class="field-label" for="vrPlace">สถานที่ใช้งาน <span class="req">*</span></label><select id="vrPlace" class="form-input" onchange="vrPlaceChange()"><option value="">-- เลือกวิทยาเขต --</option></select></div>
-                        <div id="vrPlaceOtherBox" class="sm:col-span-2 hidden"><label class="field-label" for="vrPlaceOther">ระบุสถานที่ (อื่นๆ) <span class="req">*</span></label><input id="vrPlaceOther" type="text" maxlength="150" class="form-input" placeholder="เช่น สถาบันการแพทย์จักรีนฤบดินทร์"></div>
-                    </div>
-                    <div class="mb-4">
-                        <div class="block text-sm font-bold text-fuchsia-800 mb-2">เรื่องที่ใช้ <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(เลือกได้มากกว่า 1 เรื่อง)</span></div>
-                        <div id="vrTopics" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                        <div><label class="field-label" for="vrDate">วันที่ใช้ <span class="req">*</span></label><input id="vrDate" type="date" class="form-input" onchange="vrCheck()"></div>
-                        <div class="sm:col-span-2"><label class="field-label" for="vrSlot">ช่วงเวลาที่ใช้ <span class="req">*</span></label>
-                            <select id="vrSlot" class="form-input" onchange="vrSlotChange()">
-                                <option value="">-- เลือกช่วงเวลา --</option>
-                                <option value="08:00-12:00">ช่วงเช้า 08:00–12:00 น.</option>
-                                <option value="13:00-16:00">ช่วงบ่าย 13:00–16:00 น.</option>
-                                <option value="08:00-16:00">ทั้งวัน 08:00–16:00 น.</option>
-                                <option value="custom">กำหนดเวลาเอง (ภายใน 08:00–16:00 น.)</option>
-                            </select></div>
-                    </div>
-                    <div id="vrCustomTime" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3 hidden">
-                        <div><label class="field-label" for="vrStart">เวลาเริ่ม <span class="req">*</span></label><select id="vrStart" class="form-input" onchange="vrFillEnd();vrCheck()"></select></div>
-                        <div><label class="field-label" for="vrEnd">เวลาสิ้นสุด <span class="req">*</span></label><select id="vrEnd" class="form-input" onchange="vrCheck()"></select></div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
-                        <div><label class="field-label" for="vrCount">จำนวนแว่นที่ต้องการ <span class="req">*</span></label><select id="vrCount" class="form-input" onchange="vrCheck()"><option value="">-- เลือกจำนวน --</option></select></div>
-                        <div><label class="field-label" for="vrPeople">จำนวนผู้เรียน (คน) <span class="req">*</span></label><input id="vrPeople" type="number" min="1" step="1" class="form-input" placeholder="เช่น 40"></div>
-                        <div><label class="field-label" for="vrRoom">ห้องที่จองไว้ <span class="req">*</span></label><input id="vrRoom" type="text" class="form-input" maxlength="200" placeholder="เช่น ห้อง 401 อาคารเรียนรวม ชั้น 4"></div>
-                    </div>
-                    <div id="vrAvail" class="text-sm mb-3"></div>
-                    <label class="inline-flex items-start gap-2 text-sm font-bold text-slate-700 cursor-pointer"><input id="vrRoomBooked" type="checkbox" class="w-4 h-4 mt-0.5 accent-fuchsia-600"> <span>จองห้องเรียบร้อยแล้ว <span class="text-red-500">*</span></span></label>
-                </div>
 
                 <div id="boxUploadTQF" class="hidden-step mb-5 p-5 bg-white border-2 border-blue-200 rounded-xl">
                     <label class="block text-sm font-bold text-blue-800 mb-2">ช่องอัปโหลด: ไฟล์ มม.3 <span class="text-red-500">*</span> <br><span class="text-xs text-gray-500 font-normal">รองรับเฉพาะ Word (.doc, .docx) อัปโหลดได้ไม่เกิน 2 ไฟล์</span></label>
@@ -949,9 +890,6 @@
                     <div class="text-xs text-gray-400 mt-1" id="statSla"></div>
                 </div>
             </div>
-
-            <!-- ===== สรุปการใช้แว่น VR (สำหรับผู้บริหาร) ===== -->
-            <div id="vrDashBox" class="chart-box mb-6 hidden"></div>
 
             <!-- ===== สถิติการขอใช้บริการรายวิชา ===== -->
             <div class="chart-box mb-6" id="courseStatsBox">
@@ -1452,7 +1390,7 @@
         document.getElementById('okReqId').textContent = reqId;
         document.getElementById('okEmail').textContent = p.email;
         const row = (k, v) => v && v !== '-' ? `<div><span class="text-slate-400">${k}:</span> ${ciEsc(v)}</div>` : '';
-        document.getElementById('okSummary').innerHTML = row('ระบบ', p.system) + row('บริการ', p.moodleDetail) + row('รายวิชา', p.course) + row('หลักสูตร', [p.level, p.dept, p.yearLevel ? 'ปีที่ ' + p.yearLevel : '', p.semester && p.semester !== '-' ? 'ภาคเรียนที่ ' + p.semester : '', p.year && p.year !== '-' ? 'ปีการศึกษา ' + p.year : '', p.programType].filter(x => x && x !== '-').join(' · ')) + row('กลุ่มนักศึกษา', p.section) + (p.vr ? row('แว่น VR', (p.vr.place === 'อื่นๆ' ? p.vr.placeOther : p.vr.place) + ' · ' + p.vr.count + ' อัน · ผู้เรียน ' + p.vr.participants + ' คน · ' + vrThDate(p.vr.date) + ' ' + p.vr.start + '–' + p.vr.end + ' น. · ' + p.vr.room) : '') + (p.files && p.files.length ? row('ไฟล์แนบ', p.files.length + ' ไฟล์') : '');
+        document.getElementById('okSummary').innerHTML = row('ระบบ', p.system) + row('บริการ', p.moodleDetail) + row('รายวิชา', p.course) + row('หลักสูตร', [p.level, p.dept, p.yearLevel ? 'ปีที่ ' + p.yearLevel : '', p.semester && p.semester !== '-' ? 'ภาคเรียนที่ ' + p.semester : '', p.year && p.year !== '-' ? 'ปีการศึกษา ' + p.year : '', p.programType].filter(x => x && x !== '-').join(' · ')) + row('กลุ่มนักศึกษา', p.section) + (p.files && p.files.length ? row('ไฟล์แนบ', p.files.length + ' ไฟล์') : '');
         const close = () => { m.classList.remove('show'); m.setAttribute('aria-hidden', 'true'); };
         document.getElementById('okCopy').onclick = () => {
             const btn = document.getElementById('okCopy');
@@ -1475,12 +1413,11 @@
         if (!f) return;
         const sys = document.querySelector('input[name="system"]:checked')?.value;
         const detail = document.querySelector('input[name="moodleDetail"]:checked')?.value;
-        const vr = sys === 'แว่น VR';
         const s1 = !!(f.title.value && f.name.value.trim() && document.getElementById('emailLocalPart').value.trim() && f.phone.value.trim());
         const state = {
             1: s1 ? 'done' : '',
             2: sys ? 'done' : '',
-            3: vr ? 'skip' : (detail ? 'done' : ''),
+            3: detail ? 'done' : '',
             4: document.getElementById('courseSelect').value ? 'done' : '',
             5: ''
         };
@@ -1609,20 +1546,14 @@
         document.getElementById('step4').classList.remove('visible-step');
         document.getElementById('step5').classList.remove('visible-step');
 
-        ['boxUploadTQF', 'boxUploadStudents', 'boxUploadContent', 'boxUploadQuiz', 'boxVR', 'boxEdit'].forEach(id => {
+        ['boxUploadTQF', 'boxUploadStudents', 'boxUploadContent', 'boxUploadQuiz', 'boxEdit'].forEach(id => {
             document.getElementById(id).classList.remove('visible-step');
         });
 
         updateStepper();
         if (!sys) return;
 
-        if (sys === 'แว่น VR') {
-            document.querySelectorAll('input[name="moodleDetail"]').forEach(r => r.checked = false);
-            document.getElementById('step4').classList.add('visible-step');   // แว่น VR ต้องเลือกรายวิชาด้วย (ใช้สรุปสถิติระดับ/วิชา)
-            document.getElementById('step5').classList.add('visible-step');
-            document.getElementById('boxVR').classList.add('visible-step');
-            vrLoad();
-        } else {
+        {
             document.getElementById('step3').classList.add('visible-step');
 
             if (detail) {
@@ -1983,14 +1914,6 @@
             return alert('กรุณาแนบไฟล์ให้ครบก่อนส่งคำขอ\nยังไม่ได้แนบ: ' + needFiles.map(x => x[2]).join(', '));
         }
 
-        // แว่น VR: ตรวจรายละเอียดก่อนส่ง (เซิร์ฟเวอร์ตรวจซ้ำอีกครั้ง รวมถึงจำนวนว่างล่าสุด)
-        let vrData = null;
-        if (sys === 'แว่น VR') {
-            const vErr = vrCollect();
-            if (typeof vErr === 'string') { document.getElementById('boxVR').scrollIntoView({ behavior: 'smooth', block: 'center' }); return alert(vErr); }
-            vrData = vErr;
-        }
-
         // ขอเพิ่มเนื้อหา: ตรวจตาม "วิธีส่งเนื้อหา" ที่เลือก (อัปโหลดไฟล์ / แนบลิงก์ / นำไฟล์มาให้เจ้าหน้าที่)
         let contentNote = '';
         if (document.getElementById('boxUploadContent').classList.contains('visible-step')) {
@@ -2056,7 +1979,7 @@
             system: sys, moodleDetail: detail || '-', course: cVal || '-',
             dept: s4.dept || cObj.dept || '-', semester: s4.semester || cObj.semester || '-', year: s4.year || cObj.year || '-', level: cObj.level || s4.level || '-',
             yearLevel: s4.yearLevel || cObj.yearLevel || '', section: s4.section || '', programType: s4.programType || '',
-            extraInfo: contentNote ? contentNote + ((fd.get('extraInfo') || '').trim() ? '\n' + fd.get('extraInfo').trim() : '') : (fd.get('extraInfo') || '-'), files: finalFiles, vr: vrData
+            extraInfo: contentNote ? contentNote + ((fd.get('extraInfo') || '').trim() ? '\n' + fd.get('extraInfo').trim() : '') : (fd.get('extraInfo') || '-'), files: finalFiles
         };
 
         if(isGAS) {
@@ -2070,121 +1993,10 @@
                 fileStore = { 'file_tqf': [], 'file_students': [], 'file_content': [], 'file_quiz': [] };
                 ['file_tqf', 'file_students', 'file_content'].forEach(id => updateFileDisplay(id));
                 document.getElementById('qzList').innerHTML = ''; qzUpdateNums();
-                vrState.loaded = false;
                 try { onLevelFilterChange(); } catch (e2) {}
-                document.getElementById('vrCustomTime').classList.add('hidden');
                 updateUI();
-            }).withFailureHandler(err => { document.getElementById('loading').style.display = 'none'; alert(err.message); if (vrData) vrCheck(); }).processRequest(payload);
+            }).withFailureHandler(err => { document.getElementById('loading').style.display = 'none'; alert(err.message); }).processRequest(payload);
         } else { setTimeout(()=>{ document.getElementById('loading').style.display = 'none'; alert('จำลองสำเร็จ'); }, 1000); }
-    }
-
-    /* ============ แว่น VR (ฟอร์มขอใช้) ============ */
-    const vrState = { loaded: false, info: null, avail: null, seq: 0 };
-    function vrThDate(ymd) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || ''); return m ? (+m[3]) + '/' + (+m[2]) + '/' + (+m[1] + 543) : (ymd || ''); }
-    function vrRenderInfo(d) {
-        vrState.info = d;
-        const dt = document.getElementById('vrDate'); dt.min = d.minDate;
-        const multi = (d.sites || []).length > 1;
-        document.getElementById('vrStock').innerHTML = `<i class="fas fa-vr-cardboard text-fuchsia-500 mr-1"></i> แว่นทั้งหมด <b>${d.total}</b> อัน · พร้อมใช้งาน <b class="text-emerald-600">${d.ready}</b> อัน` + (d.broken ? ` <span class="text-gray-400">(ไม่พร้อมใช้งาน ${d.broken} อัน)</span>` : '') +
-            (multi ? `<div class="text-xs text-gray-500 mt-1">${d.sites.map(x => `${ciEsc(x.name)} พร้อมใช้ ${x.ready} อัน`).join(' · ')} — ถ้าวิทยาเขตที่ใช้ไม่พอ ระบบจะยืมจากวิทยาเขตอื่นให้อัตโนมัติ</div>` : '');
-        const ps = document.getElementById('vrPlace'), curP = ps.value;
-        ps.innerHTML = '<option value="">-- เลือกวิทยาเขต --</option>' + (d.places || []).map(p => `<option value="${ciEsc(p)}">${ciEsc(p)}</option>`).join('') + '<option value="อื่นๆ">อื่นๆ (โปรดระบุ)</option>';
-        ps.value = curP;
-        const box = document.getElementById('vrTopics');
-        const checked = [...box.querySelectorAll('input:checked')].map(x => x.value);
-        box.innerHTML = (d.topics || []).map(t => `<label class="checkbox-card"><input type="checkbox" name="vrTopic" value="${ciEsc(t)}"${checked.includes(t) ? ' checked' : ''}> <span>${ciEsc(t)}</span></label>`).join('') || '<div class="text-sm text-gray-400">ยังไม่มีเรื่องให้เลือก กรุณาติดต่อเจ้าหน้าที่</div>';
-        vrFillCount(Math.min(VR_MAX_COUNT, d.total || VR_MAX_COUNT), null);
-    }
-    function vrLoad() {
-        if (vrState.loaded || !isGAS) return;
-        vrState.loaded = true;
-        google.script.run.withSuccessHandler(d => { vrRenderInfo(d); vrCheck(); })
-            .withFailureHandler(e => { vrState.loaded = false; document.getElementById('vrStock').textContent = 'โหลดข้อมูลแว่น VR ไม่สำเร็จ: ' + (e.message || e); }).getVrInfo('', '', '');
-    }
-    const VR_MAX_COUNT = 18, VR_T0 = 8 * 60, VR_T1 = 16 * 60;   // จำนวนแว่นสูงสุด / เวลาราชการ 08:00–16:00
-    const vrHm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
-    /** ตัวเลือกจำนวนแว่น 1..max (ตัวเลือกที่เกินจำนวนว่างจะกดไม่ได้) */
-    function vrFillCount(max, avail) {
-        const sel = document.getElementById('vrCount'), cur = sel.value;
-        let h = '<option value="">-- เลือกจำนวน --</option>';
-        for (let i = 1; i <= max; i++) h += `<option value="${i}"${avail !== null && i > avail ? ' disabled' : ''}>${i} อัน${avail !== null && i > avail ? ' (ไม่ว่าง)' : ''}</option>`;
-        sel.innerHTML = h;
-        sel.value = cur && (avail === null || +cur <= avail) ? cur : (cur && avail !== null && +cur > avail ? '' : cur);
-    }
-    function vrFillStart() {
-        const sel = document.getElementById('vrStart'); if (sel.options.length) return;
-        let h = '<option value="">--</option>'; for (let m = VR_T0; m < VR_T1; m += 30) h += `<option value="${vrHm(m)}">${vrHm(m)} น.</option>`;
-        sel.innerHTML = h; vrFillEnd();
-    }
-    function vrFillEnd() {
-        const st = document.getElementById('vrStart').value, sel = document.getElementById('vrEnd'), cur = sel.value;
-        const from = st ? (+st.slice(0, 2) * 60 + +st.slice(3)) + 30 : VR_T0 + 30;
-        let h = '<option value="">--</option>'; for (let m = from; m <= VR_T1; m += 30) h += `<option value="${vrHm(m)}">${vrHm(m)} น.</option>`;
-        sel.innerHTML = h; if (cur && cur > st) sel.value = cur;
-    }
-    function vrSlotChange() {
-        const v = document.getElementById('vrSlot').value, custom = v === 'custom';
-        document.getElementById('vrCustomTime').classList.toggle('hidden', !custom);
-        vrFillStart();
-        if (!custom) {
-            const [a, b] = v ? v.split('-') : ['', ''];
-            document.getElementById('vrStart').value = a; vrFillEnd(); document.getElementById('vrEnd').value = b;
-        }
-        vrCheck();
-    }
-    function vrPlaceChange() {
-        document.getElementById('vrPlaceOtherBox').classList.toggle('hidden', document.getElementById('vrPlace').value !== 'อื่นๆ');
-        vrCheck();
-    }
-    function vrCheck() {
-        const place = document.getElementById('vrPlace').value;
-        const date = document.getElementById('vrDate').value, st = document.getElementById('vrStart').value, en = document.getElementById('vrEnd').value;
-        const out = document.getElementById('vrAvail'); vrState.avail = null;
-        if (!date || !st || !en) { out.innerHTML = ''; return; }
-        if (vrState.info && date < vrState.info.minDate) { out.innerHTML = `<span class="text-red-600 font-bold"><i class="fas fa-circle-exclamation"></i> ต้องขอล่วงหน้าอย่างน้อย 7 วันทำการ</span>`; return; }
-        if (st >= en) { out.innerHTML = '<span class="text-red-600 font-bold"><i class="fas fa-circle-exclamation"></i> เวลาสิ้นสุดต้องหลังเวลาเริ่ม</span>'; return; }
-        if (!isGAS) return;
-        const my = ++vrState.seq;
-        out.innerHTML = '<span class="text-gray-400"><i class="fas fa-spinner fa-spin"></i> กำลังตรวจจำนวนแว่นว่าง...</span>';
-        google.script.run.withSuccessHandler(d => {
-            if (my !== vrState.seq) return;
-            vrRenderInfo(d); vrState.avail = d.available;
-            vrFillCount(Math.min(VR_MAX_COUNT, d.total || VR_MAX_COUNT), d.available);
-            const sf = d.siteFree || [];
-            const local = sf.find(x => x.local);
-            const detail = sf.length > 1 ? `<div class="text-xs text-gray-500 mt-1">${sf.map(x => `${ciEsc(x.name)} ว่าง ${x.free} อัน${x.local ? ' (วิทยาเขตที่ใช้)' : ' (ยืมได้ — กันไว้ทั้งวัน)'}`).join(' · ')}</div>` : '';
-            const cnt = parseInt(document.getElementById('vrCount').value, 10) || 0;
-            const borrow = sf.length > 1 && cnt > 0 && cnt <= d.available && (!local || cnt > local.free)
-                ? `<div class="text-xs text-amber-700 mt-1"><i class="fas fa-truck"></i> จำนวนนี้ต้องยืมแว่นจากวิทยาเขตอื่น ${local ? cnt - local.free : cnt} อัน (เจ้าหน้าที่จะขนย้ายให้)</div>` : '';
-            out.innerHTML = (d.available > 0
-                ? `<span class="text-emerald-700 font-bold"><i class="fas fa-circle-check"></i> ช่วงเวลานี้ขอได้สูงสุด ${d.available} อัน</span>`
-                : `<span class="text-red-600 font-bold"><i class="fas fa-circle-xmark"></i> ช่วงเวลานี้แว่นถูกจองเต็มแล้ว กรุณาเลือกวันหรือเวลาอื่น</span>`) + detail + borrow;
-        }).withFailureHandler(() => { if (my === vrState.seq) out.innerHTML = ''; }).getVrInfo(date, st, en, place === 'อื่นๆ' ? 'อื่นๆ' : place);
-    }
-    /** รวบรวมข้อมูล VR → คืน object หรือข้อความ error */
-    function vrCollect() {
-        const v = {
-            place: document.getElementById('vrPlace').value, placeOther: document.getElementById('vrPlaceOther').value.trim(),
-            topics: [...document.querySelectorAll('input[name="vrTopic"]:checked')].map(x => x.value),
-            date: document.getElementById('vrDate').value, start: document.getElementById('vrStart').value, end: document.getElementById('vrEnd').value,
-            count: parseInt(document.getElementById('vrCount').value, 10), participants: parseInt(document.getElementById('vrPeople').value, 10), room: document.getElementById('vrRoom').value.trim(),
-            roomBooked: document.getElementById('vrRoomBooked').checked
-        };
-        if (!v.place) return 'กรุณาเลือกสถานที่ใช้งาน';
-        if (v.place === 'อื่นๆ' && !v.placeOther) return 'กรุณาระบุสถานที่ใช้งาน (อื่นๆ)';
-        if (!v.topics.length) return 'กรุณาเลือกเรื่องที่ใช้อย่างน้อย 1 เรื่อง';
-        if (!v.date) return 'กรุณาเลือกวันที่ใช้แว่น VR';
-        if (vrState.info && v.date < vrState.info.minDate) return 'ต้องขอใช้แว่น VR ล่วงหน้าอย่างน้อย 7 วันทำการ';
-        if (!document.getElementById('vrSlot').value) return 'กรุณาเลือกช่วงเวลาที่ใช้';
-        if (!v.start || !v.end || v.start >= v.end) return 'กรุณาระบุเวลาเริ่ม-สิ้นสุดให้ถูกต้อง';
-        if (v.start < '08:00' || v.end > '16:00') return 'ใช้งานได้เฉพาะเวลาราชการ 08:00–16:00 น.';
-        if (v.count > VR_MAX_COUNT) return 'จำนวนแว่นต้องไม่เกิน ' + VR_MAX_COUNT + ' อัน';
-        if (!(v.count >= 1)) return 'กรุณาระบุจำนวนแว่นอย่างน้อย 1 อัน';
-        if (!(v.participants >= 1)) return 'กรุณาระบุจำนวนผู้เรียน';
-        if (vrState.avail !== null && v.count > vrState.avail) return 'ช่วงเวลานี้เหลือแว่นว่าง ' + vrState.avail + ' อัน กรุณาลดจำนวนหรือเลือกช่วงเวลาอื่น';
-        if (!v.room) return 'กรุณาระบุห้องที่จองไว้';
-        if (!v.roomBooked) return 'กรุณาจองห้องให้เรียบร้อยก่อน แล้วติ๊ก "จองห้องเรียบร้อยแล้ว"';
-        return v;
     }
 
     function trackStatus() {
@@ -2366,56 +2178,6 @@
         google.script.run.withSuccessHandler(ys => { cmBusy(false); ACADEMIC_YEARS = ys || []; svHide('ayModal'); populateFilters(); cmFillFilters(); cmRender(); cmToast('บันทึกปีการศึกษาแล้ว'); })
             .withFailureHandler(e => { cmBusy(false); if (isSessionErr(e)) { svHide('ayModal'); return handleSessionExpired(); } alert(e.message || e); })
             .saveAcademicYears(ayYears, adminToken);
-    }
-
-    /* ============ ตั้งค่าแว่น VR (Admin) ============ */
-    let vrsTopics = [], vrsSites = [];
-    function vrsCalc() {
-        let T = 0, B = 0;
-        vrsSites.forEach((x, i) => { const t = parseInt(x.total, 10) || 0, b = parseInt(x.broken, 10) || 0; T += t; B += b; const el = document.getElementById('vrsR' + i); if (el) el.textContent = Math.max(0, t - b); });
-        document.getElementById('vrsSumT').textContent = T; document.getElementById('vrsSumB').textContent = B; document.getElementById('vrsSumR').textContent = Math.max(0, T - B);
-    }
-    function vrsRenderSites() {
-        document.getElementById('vrsSites').innerHTML = vrsSites.map((x, i) => `<tr>
-            <td class="p-1"><input class="form-input" style="padding:.45rem .6rem" value="${ciEsc(x.name)}" placeholder="เช่น ศาลายา" oninput="vrsSites[${i}].name=this.value"></td>
-            <td class="p-1"><input type="number" min="0" class="form-input text-center" style="padding:.45rem .3rem" value="${x.total}" oninput="vrsSites[${i}].total=this.value;vrsCalc()"></td>
-            <td class="p-1"><input type="number" min="0" class="form-input text-center" style="padding:.45rem .3rem" value="${x.broken}" oninput="vrsSites[${i}].broken=this.value;vrsCalc()"></td>
-            <td class="p-1 text-center font-bold text-emerald-700" id="vrsR${i}"></td>
-            <td class="p-1"><button type="button" class="text-red-500 hover:text-red-700 px-1" title="ลบวิทยาเขต" onclick="vrsDelSite(${i})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-        vrsCalc();
-    }
-    function vrsAddSite() { vrsSites.push({ name: '', total: 0, broken: 0 }); vrsRenderSites(); }
-    async function vrsDelSite(i) { if (vrsSites.length <= 1) return alert('ต้องมีวิทยาเขตอย่างน้อย 1 แห่ง'); if (!await uiConfirm('ลบวิทยาเขต "' + (vrsSites[i].name || '-') + '" ?')) return; vrsSites.splice(i, 1); vrsRenderSites(); }
-    function vrsRender() {
-        document.getElementById('vrsTopics').innerHTML = vrsTopics.map((t, i) => `<div class="flex gap-2 items-center"><input class="form-input flex-1" value="${ciEsc(t)}" oninput="vrsTopics[${i}]=this.value"><button type="button" class="text-red-500 hover:text-red-700 px-2" title="ลบเรื่องนี้" onclick="vrsDel(${i})"><i class="fas fa-trash"></i></button></div>`).join('') || '<div class="text-sm text-gray-400">ยังไม่มีเรื่อง</div>';
-    }
-    function vrsAdd() { const el = document.getElementById('vrsNew'), v = el.value.trim(); if (!v) return; vrsTopics.push(v); el.value = ''; vrsRender(); }
-    async function vrsDel(i) { if (!await uiConfirm('ลบเรื่อง "' + vrsTopics[i] + '" ?')) return; vrsTopics.splice(i, 1); vrsRender(); }
-    function vrsOpen() {
-        cmBusy(true, 'กำลังโหลด...');
-        google.script.run.withSuccessHandler(d => {
-            cmBusy(false);
-            vrsSites = (d.sites || []).map(x => ({ name: x.name, total: x.total, broken: x.broken })); vrsRenderSites();
-            vrsTopics = (d.topics || []).slice(); vrsRender(); document.getElementById('vrsNew').value = '';
-            const m = document.getElementById('vrsModal'); m.classList.add('show'); m.setAttribute('aria-hidden', 'false');
-        }).withFailureHandler(e => { cmBusy(false); if (isSessionErr(e)) { alert('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่'); logoutAdmin(); return; } alert(e.message || e); }).getVrSettings(adminToken);
-    }
-    function vrsSave() {
-        const topics = vrsTopics.map(x => String(x).trim()).filter(Boolean);
-        const sites = vrsSites.map(x => ({ name: String(x.name || '').trim(), total: parseInt(x.total, 10), broken: parseInt(x.broken, 10) || 0 }));
-        if (!sites.length) return alert('ต้องมีวิทยาเขตอย่างน้อย 1 แห่ง');
-        for (const x of sites) {
-            if (!x.name) return alert('กรุณาระบุชื่อวิทยาเขตให้ครบ');
-            if (/[,:]/.test(x.name)) return alert('ชื่อวิทยาเขตห้ามมีเครื่องหมาย , หรือ :');
-            if (!(x.total >= 0)) return alert('กรุณาระบุจำนวนแว่นทั้งหมดของ ' + x.name);
-            if (x.broken < 0 || x.broken > x.total) return alert('จำนวนที่ไม่พร้อมใช้งานของ ' + x.name + ' ต้องอยู่ระหว่าง 0 ถึง ' + x.total);
-        }
-        if (new Set(sites.map(x => x.name)).size !== sites.length) return alert('ชื่อวิทยาเขตซ้ำกัน');
-        if (!topics.length) return alert('ต้องมีเรื่องอย่างน้อย 1 เรื่อง');
-        cmBusy(true);
-        google.script.run.withSuccessHandler(() => { cmBusy(false); svHide('vrsModal'); vrState.loaded = false; alert('บันทึกการตั้งค่าแว่น VR แล้ว'); })
-            .withFailureHandler(e => { cmBusy(false); if (isSessionErr(e)) { svHide('vrsModal'); alert('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่'); logoutAdmin(); return; } alert(e.message || e); })
-            .saveVrSettings({ sites: sites, topics: topics }, adminToken);
     }
 
     function pwOpen() {
@@ -4152,69 +3914,7 @@
     // ชื่อที่แสดงของ Admin ในดัชบอร์ด (admin1 → ดร.มงคล แปลงกาย)
     function dashName(u) { return (lastDashboardData && lastDashboardData.adminNames && lastDashboardData.adminNames[u]) || u; }
     function dashThaiDate(s) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? (+m[3]) + '/' + (+m[2]) + '/' + (+m[1] + 543) : (s || ''); }
-    /* ============ ดัชบอร์ด: สรุปการใช้แว่น VR ============ */
-    function renderVrDash(data) {
-        const box = document.getElementById('vrDashBox'), v = data.vr, sys = document.getElementById('dashFilterSystem').value;
-        if (!v || (sys && sys !== 'แว่น VR') || (!sys && !v.requests)) { box.classList.add('hidden'); return; }
-        box.classList.remove('hidden');
-        const e = ciEsc, pct = (a, b) => b ? Math.round(a * 1000 / b) / 10 : 0, num = n => Number(n || 0).toLocaleString('th-TH');
-        const head = `<div class="flex flex-wrap justify-between items-start gap-2 mb-4"><div><h3 class="font-bold text-gray-800 text-lg"><i class="fas fa-vr-cardboard text-fuchsia-500 mr-1"></i> สรุปการใช้แว่น VR</h3>
-            <p class="text-xs text-gray-400">นับเฉพาะคำขอที่ไม่ถูกยกเลิก ตามตัวกรองด้านบน · แว่นทั้งหมด ${v.total} อัน (พร้อมใช้งาน ${v.ready} อัน${v.broken ? ', ไม่พร้อมใช้ ' + v.broken + ' อัน' : ''})</p></div></div>`;
-        if (!v.requests) { box.innerHTML = head + '<div class="p-8 text-center text-gray-400 border border-dashed rounded-xl">ยังไม่มีคำขอใช้แว่น VR ในช่วงที่เลือก</div>'; return; }
-        const t1 = v.topics[0], l1 = v.levels.find(x => x.name !== 'ไม่ระบุระดับ'), c1 = v.courses.find(x => x.name !== 'ไม่ระบุรายวิชา');
-        const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
-        const dmax = Math.max(...v.weekdays), dTop = dmax ? days[v.weekdays.indexOf(dmax)] : '';
-        const unused = v.topics.filter(x => !x.req).map(x => x.name);
-        // ข้อค้นพบสำคัญ (ภาษาง่าย สำหรับตัดสินใจ)
-        const ins = [];
-        if (t1 && t1.req) ins.push(`<b>เรื่องที่ขอใช้มากที่สุด:</b> ${e(t1.name)} — ${t1.req} ครั้ง (${pct(t1.req, v.withDetail)}% ของคำขอ) ผู้เรียน ${num(t1.participants)} คน`);
-        if (l1) ins.push(`<b>ระดับที่ใช้มากที่สุด:</b> ${e(l1.name)} — ${l1.req} ครั้ง`);
-        if (c1) ins.push(`<b>รายวิชาที่ใช้มากที่สุด:</b> ${e(c1.name)} — ${c1.req} ครั้ง`);
-        if (dTop) ins.push(`<b>วันที่นิยมใช้:</b> วัน${dTop} (${dmax} ครั้ง)`);
-        ins.push(v.nearFull
-            ? `<span class="text-red-600"><b>ความพร้อมของอุปกรณ์:</b> มี ${v.nearFull} ครั้งที่ขอใช้ตั้งแต่ 80% ของแว่นที่พร้อมใช้ (สูงสุด ${v.maxCount}/${v.ready} อัน) → ควรพิจารณาซ่อม/จัดหาแว่นเพิ่ม</span>`
-            : `<b>ความพร้อมของอุปกรณ์:</b> ใช้สูงสุด ${v.maxCount}/${v.ready} อันต่อครั้ง — จำนวนแว่นยังเพียงพอ`);
-        if ((v.sites || []).length > 1) {
-            ins.push(`<b>การใช้แว่นแยกวิทยาเขต:</b> ` + v.sites.map(x => `${e(x.name)} ${num(x.glasses)} แว่น-ครั้ง (มี ${x.ready}/${x.total} อัน)`).join(' · '));
-            if (v.transfers) ins.push(`<span class="text-amber-700"><b>ยืมแว่นข้ามวิทยาเขต ${v.transfers} ครั้ง</b> (${pct(v.transfers, v.withDetail)}% ของการใช้)` +
-                (v.moves[0] ? ` — เส้นทางบ่อยที่สุด ${e(v.moves[0].name)} (${v.moves[0].n} ครั้ง) → ถ้ายืมบ่อย ควรพิจารณาเพิ่มแว่นประจำปลายทาง` : '') + `</span>`);
-        }
-        if (v.broken) ins.push(`<span class="text-amber-700"><b>แว่นไม่พร้อมใช้งาน ${v.broken} อัน</b> (${pct(v.broken, v.total)}%) — ควรติดตามการซ่อม</span>`);
-        if (unused.length) ins.push(`<span class="text-gray-500"><b>เรื่องที่ยังไม่มีผู้ขอใช้:</b> ${unused.map(e).join(', ')} — อาจประชาสัมพันธ์เพิ่ม</span>`);
-        const card = (icon, color, val, label, sub) => `<div class="stat-card"><div class="icon-badge bg-${color}-100 text-${color}-600"><i class="fas ${icon}"></i></div><div class="stat-num text-${color}-700">${val}</div><div class="text-sm text-gray-500 font-medium">${label}</div>${sub ? `<div class="text-xs text-gray-400 mt-1">${sub}</div>` : ''}</div>`;
-        const bars = (list, unit) => {
-            const mx = Math.max(1, ...list.map(x => x.req));
-            return list.map(x => `<div class="mb-2"><div class="flex justify-between text-sm gap-2"><span class="font-medium text-gray-700 truncate" title="${e(x.name)}">${e(x.name)}</span><span class="whitespace-nowrap text-gray-500"><b class="text-gray-800">${x.req}</b> ครั้ง · ${num(x.participants)} คน</span></div>
-                <div class="h-2.5 bg-gray-100 rounded-full mt-1"><div class="h-2.5 rounded-full ${x.req ? 'bg-fuchsia-500' : ''}" style="width:${x.req / mx * 100}%"></div></div></div>`).join('') || '<div class="text-sm text-gray-400">ไม่มีข้อมูล</div>';
-        };
-        const mon = v.months.map(m => { const [y, mo] = m.ym.split('-'); return { name: ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][+mo - 1] + ' ' + String(+y + 543).slice(2), req: m.req, participants: 0 }; });
-        const monMax = Math.max(1, ...mon.map(m => m.req));
-        const monHtml = mon.length ? `<div class="flex items-end gap-2 h-32 border-b border-gray-200 pb-1">` + mon.map(m => `<div class="flex-1 flex flex-col items-center justify-end h-full min-w-[2rem]"><span class="text-xs font-bold text-gray-700">${m.req}</span><div class="w-full bg-fuchsia-400 rounded-t" style="height:${m.req / monMax * 85}%"></div></div>`).join('') + `</div><div class="flex gap-2 mt-1">` + mon.map(m => `<div class="flex-1 text-center text-[11px] text-gray-500 min-w-[2rem]">${m.name}</div>`).join('') + '</div>' : '<div class="text-sm text-gray-400">ไม่มีข้อมูล</div>';
-        const upc = v.upcoming.length ? `<div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-gray-100"><tr><th class="p-2">วันที่</th><th class="p-2">เวลา</th><th class="p-2">สถานที่</th><th class="p-2 text-right">แว่น</th><th class="p-2 text-right">ผู้เรียน</th><th class="p-2">เรื่อง</th><th class="p-2">รายวิชา</th><th class="p-2">ห้อง</th><th class="p-2">สถานะ</th></tr></thead><tbody>` +
-            v.upcoming.map(u => `<tr class="border-b"><td class="p-2 whitespace-nowrap font-bold">${e(u.dateTh)}</td><td class="p-2 whitespace-nowrap">${e(u.start)}–${e(u.end)}</td><td class="p-2">${e(u.place || '-')}${u.moved ? `<div class="text-amber-700 whitespace-nowrap" title="${e(u.alloc)}"><i class="fas fa-truck"></i> ${e(u.alloc)}</div>` : ''}</td><td class="p-2 text-right">${u.count}</td><td class="p-2 text-right">${u.participants || '-'}</td><td class="p-2">${e(u.topics)}</td><td class="p-2">${e(u.course)}</td><td class="p-2">${e(u.room)}</td><td class="p-2">${e(u.status)}</td></tr>`).join('') + '</tbody></table></div>'
-            : '<div class="text-sm text-gray-400">ไม่มีการจองที่กำลังจะถึง</div>';
-        box.innerHTML = head +
-            `<div class="p-4 rounded-xl bg-fuchsia-50 border border-fuchsia-100 mb-5"><div class="font-bold text-fuchsia-800 mb-2"><i class="fas fa-lightbulb mr-1"></i> ข้อค้นพบสำคัญ</div><ul class="list-disc pl-5 space-y-1 text-sm text-gray-700">${ins.map(x => '<li>' + x + '</li>').join('')}</ul></div>` +
-            `<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">` +
-                card('fa-calendar-check', 'fuchsia', num(v.requests), 'คำขอใช้แว่น VR', v.withDetail < v.requests ? `มีรายละเอียดการจอง ${v.withDetail} รายการ` : '') +
-                card('fa-user-graduate', 'indigo', num(v.participants), 'ผู้เรียนที่ได้ใช้ (คน)', v.withDetail ? 'เฉลี่ย ' + Math.round(v.participants / v.withDetail) + ' คน/ครั้ง' : '') +
-                card('fa-clock', 'emerald', num(v.hours), 'ชั่วโมงการใช้งาน', 'รวม ' + num(v.glassHours) + ' แว่น-ชั่วโมง') +
-                card('fa-gauge-high', v.avgUtilPct >= 80 ? 'red' : 'amber', v.avgUtilPct + '%', 'อัตราใช้แว่นเฉลี่ยต่อครั้ง', 'เทียบกับแว่นพร้อมใช้ ' + v.ready + ' อัน') +
-            `</div>` +
-            `<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-                <div><h4 class="font-bold text-slate-600 text-sm mb-2"><i class="fas fa-gamepad mr-1"></i> เรื่องที่ขอใช้</h4>${bars(v.topics)}</div>
-                <div><h4 class="font-bold text-slate-600 text-sm mb-2"><i class="fas fa-layer-group mr-1"></i> ระดับการศึกษา</h4>${bars(v.levels)}</div>
-                <div><h4 class="font-bold text-slate-600 text-sm mb-2"><i class="fas fa-book mr-1"></i> รายวิชา (10 อันดับแรก)</h4>${bars(v.courses)}</div>
-            </div>` +
-            `<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div><h4 class="font-bold text-slate-600 text-sm mb-2"><i class="fas fa-chart-column mr-1"></i> จำนวนครั้งที่ใช้รายเดือน (ตามวันที่ใช้)</h4>${monHtml}
-                    <h4 class="font-bold text-slate-600 text-sm mb-2 mt-5"><i class="fas fa-location-dot mr-1"></i> สถานที่ใช้งาน</h4>${bars(v.places || [])}</div>
-                <div class="md:col-span-2"><h4 class="font-bold text-slate-600 text-sm mb-2"><i class="fas fa-calendar-days mr-1"></i> การจองที่กำลังจะถึง</h4>${upc}</div>
-            </div>`;
-    }
-
     function renderDashboard(data) {
-        try { document.getElementById('vrDashBox').classList.add('hidden'); } catch (err) {}   // ยกเลิกบริการแว่น VR ในระบบนี้แล้ว
         document.getElementById('dashboardUpdatedAt').innerText = 'อัปเดตล่าสุด: ' + new Date().toLocaleString('th-TH');
 
         // การ์ดสรุป
@@ -4496,7 +4196,7 @@
         const map = {};
         csFilteredReqs.forEach(r => {
             const k = r.noCourse ? '__none__' : csNormId(r.cid) + '|' + r.semester + '|' + r.year;
-            if (!map[k]) map[k] = { key: k, id: r.noCourse ? '' : r.cid, name: r.noCourse ? 'ไม่ระบุรายวิชา (เช่น แว่น VR)' : r.cname,
+            if (!map[k]) map[k] = { key: k, id: r.noCourse ? '' : r.cid, name: r.noCourse ? 'ไม่ระบุรายวิชา' : r.cname,
                                     level: r.level, dept: r.dept, yearLevel: r.yearLevel, semester: r.semester, year: r.year,
                                     total: 0, done: 0, last: 0, lastText: '', byType: {}, reqs: [], noCourse: r.noCourse };
             const g = map[k];
