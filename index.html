@@ -78,6 +78,7 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Kanit', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        @media (min-width: 1100px) { main.container, nav > .container, .sf-main { max-width: min(96vw, 1760px) !important; } }
         .glass-card { background: rgba(255, 255, 255, 1); border-radius: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
 
         /* ===== แก้ไข: เขียน CSS ตรง ๆ แทน @apply ที่ Tailwind CDN ไม่รองรับใน <style> ===== */
@@ -793,7 +794,6 @@
             <button onclick="trackStatus()" class="btn btn-primary" style="padding:.75rem 1.4rem"><i class="fas fa-magnifying-glass"></i> ค้นหา</button>
             <button type="button" onclick="trackReset()" class="btn" style="padding:.75rem 1.1rem;background:#fff;border:1px solid #cbd5e1;color:#475569" title="ล้างผลการค้นหา"><i class="fas fa-rotate-left"></i> รีเซ็ต</button>
         </div>
-        <p class="text-xs text-slate-500 mb-2"><i class="fas fa-envelope mr-1"></i>ระบบจะส่งรหัสยืนยัน 6 หลักไปที่อีเมลนี้ (ใช้ได้ 10 นาที) กรุณาตรวจสอบกล่องจดหมายและอีเมลขยะ</p>
         <div class="mb-6 text-right"><button type="button" id="forgetMeBtn" onclick="forgetRequester()" class="hidden text-xs text-slate-500 hover:text-red-600 underline" title="ใช้เครื่องร่วมกับผู้อื่น? ล้างชื่อ/เบอร์/อีเมลที่เครื่องนี้จำไว้"><i class="fas fa-user-slash mr-1"></i>ไม่ใช่ฉัน / ล้างข้อมูลที่จำไว้</button></div>
         <div id="trackResult" class="space-y-4"></div>
     </div>
@@ -1539,6 +1539,16 @@
         if (tabId === 'dashboard' && currentAdminUser && document.getElementById('execDashboardArea').classList.contains('hidden')) openDashboard();
     }
 
+    /** ไฟล์แนบ (ปุ่มดาวน์โหลด) + รายละเอียดเพิ่มเติมที่ผู้ขอกรอก แสดงใต้ชื่อวิชา/บริการในแถวหลัก */
+    function rmMainExtras(r) {
+        const urls = (r.files || '').split('\n').map(x => x.trim()).filter(x => x.startsWith('http'));
+        const dl = u => { const m = u.match(/[/]d[/]([\w-]+)/) || u.match(/[?&]id=([\w-]+)/); return m ? 'https://drive.google.com/uc?export=download&id=' + m[1] : u; };
+        const btns = urls.map((u, j) => `<span class="inline-flex mr-1 mb-1 rounded text-xs font-bold bg-blue-50 text-blue-700 overflow-hidden"><a href="${ciEsc(u)}" target="_blank" rel="noopener" class="px-2 py-1 hover:bg-blue-100" title="เปิดดูไฟล์ ${j + 1}"><i class="fas fa-file mr-1"></i>ไฟล์ ${j + 1}</a><a href="${ciEsc(dl(u))}" target="_blank" rel="noopener" class="px-2 py-1 bg-blue-100 hover:bg-blue-200" title="ดาวน์โหลดไฟล์ ${j + 1}"><i class="fas fa-download"></i></a></span>`).join('');
+        const ex = String(r.extra || '').trim();
+        return (btns ? `<div class="mt-1.5">${btns}</div>` : '') +
+            (ex && ex !== '-' ? `<div class="mt-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-gray-700 whitespace-pre-wrap" style="max-width:26rem"><b class="text-amber-700"><i class="fas fa-comment-dots mr-1"></i>รายละเอียดที่ขอ:</b>\n${ciEsc(ex)}</div>` : '');
+    }
+
     function updateUI() {
         const sys = document.querySelector('input[name="system"]:checked')?.value;
         const detail = document.querySelector('input[name="moodleDetail"]:checked')?.value;
@@ -1604,8 +1614,8 @@
         'สาขาวิชาการพยาบาลมารดา-ทารกและการผดุงครรภ์', 'สาขาวิชาการพยาบาลจิตเวชและสุขภาพจิต', 'สาขาวิชาการพยาบาลสุขภาพชุมชน'];
     const MASTER_DEPTS = ['สาขาวิชาการพยาบาลเด็ก', 'สาขาวิชาการพยาบาลผู้ใหญ่และผู้สูงอายุ', 'สาขาวิชาการพยาบาลเวชปฏิบัติชุมชน',
         'สาขาวิชาการพยาบาลจิตเวชและสุขภาพจิต', 'สาขาวิชาการผดุงครรภ์', 'สาขาวิชาการพยาบาลเวชปฏิบัติผู้สูงอายุ', 'วิชาแกน วิชาเลือก และวิทยานิพนธ์'];
-    const STUDENT_SECTIONS = ['เปิดรายวิชา Section A – 1 Link และเปิดรายวิชา Section B – 1 Link',
-        'เปิดเป็น 1 รายวิชา แต่เมื่อเข้าไปจะแยกเป็น Section A และ Section B', 'เปิดเป็น 1 รายวิชา (ไม่แยก Section A / B)'];
+    const STUDENT_SECTIONS = ['แยก Section A – 1 Link และ Section B – 1 Link',
+        'รวมเป็น 1 รายวิชา แต่เมื่อเข้าไปจะแยกเป็น Section A และ Section B', 'รวมเป็น 1 รายวิชา (ไม่แยก Section A / B)'];
     const YEAR_LEVELS = ['1', '2', '3', '4'];
     let ACADEMIC_YEARS = ['2569', '2570'];   // ค่าเริ่มต้น (แทนที่ด้วยรายการจาก Admin เมื่อโหลดเสร็จ)
     let coursesLoaded = false;
@@ -2322,7 +2332,7 @@
             let html = `<tr class="border-b st-row ${stCls} ${rowCls}">
                 <td class="p-3 text-xs whitespace-nowrap">${ciEsc(r.date)}<div class="text-gray-400">${ciEsc(r.reqId)}</div></td>
                 <td class="p-3"><div class="font-bold">${ciEsc(r.name)}</div><div class="text-xs text-gray-400">${ciEsc(r.email)}</div></td>
-                <td class="p-3" style="min-width:10rem"><div>${ciEsc(r.course === '-' ? '' : r.course) || '<span class="text-gray-400">ไม่ระบุรายวิชา</span>'}</div><div class="text-xs text-indigo-600 font-bold">${ciEsc(r.system)}${r.detail && r.detail !== '-' ? ' · ' + ciEsc(r.detail) : ''}</div>${rmLevelText(r) ? `<div class="text-xs text-gray-500 mt-0.5">${ciEsc(rmLevelText(r))}</div>` : ''}</td>
+                <td class="p-3" style="min-width:10rem"><div>${ciEsc(r.course === '-' ? '' : r.course) || '<span class="text-gray-400">ไม่ระบุรายวิชา</span>'}</div><div class="text-xs text-indigo-600 font-bold">${ciEsc(r.system)}${r.detail && r.detail !== '-' ? ' · ' + ciEsc(r.detail) : ''}</div>${rmLevelText(r) ? `<div class="text-xs text-gray-500 mt-0.5">${ciEsc(rmLevelText(r))}</div>` : ''}${rmMainExtras(r)}</td>
                 <td class="p-3 whitespace-nowrap">${rmSlaBadge(r)}<div class="text-xs text-gray-400 mt-0.5">${ciEsc(r.due)} (${r.slaDays} วันทำการ)</div></td>
                 <td class="p-2" style="min-width:11rem">
                     <div class="flex items-center justify-between gap-2 mb-1.5"><span class="st-pill">${ciEsc(r.status || 'รออนุมัติ')}</span>${r.status !== 'ยกเลิก' ? `<span class="text-xs font-bold" style="color:var(--st-fg)">${pct}%</span>` : ''}</div>
