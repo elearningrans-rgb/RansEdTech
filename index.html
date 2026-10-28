@@ -994,7 +994,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div class="chart-box">
-                    <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-server text-indigo-500 mr-1"></i> คำขอแยกตามระบบ</h3>
+                    <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-list-check text-indigo-500 mr-1"></i> คำขอแยกตามประเภทบริการ</h3>
                     <div class="dash-chart-wrap" style="height:280px"><canvas id="chartBySystem"></canvas></div>
                 </div>
                 <div class="chart-box">
@@ -1004,8 +1004,9 @@
             </div>
 
             <div class="chart-box mb-6">
-                <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-chart-line text-indigo-500 mr-1"></i> แนวโน้มคำขอรายเดือน</h3>
+                <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-chart-line text-indigo-500 mr-1"></i> แนวโน้มรายเดือน: จำนวนคำขอ · % เสร็จทันกำหนด</h3>
                 <div class="dash-chart-wrap" style="height:260px"><canvas id="chartByMonth"></canvas></div>
+                <div id="monthSlaChips" class="flex flex-wrap gap-2 mt-3 text-xs"></div>
             </div>
 
             <!-- สรุปแต่ละ Admin -->
@@ -1031,6 +1032,7 @@
             </div>
             <!-- ===== ผลประเมินความพึงพอใจ ===== -->
             <div id="dashSurvey" class="hidden">
+                <div id="rtBox" class="glass-card p-6 md:p-8 mb-6"></div>
                 <div class="glass-card p-6 md:p-8 mb-6">
                     <div class="print-only mb-3">
                         <h2 class="text-xl font-bold text-gray-900">รายงานผลการประเมินความพึงพอใจการให้บริการ Smart e-Learning RSON</h2>
@@ -1498,6 +1500,7 @@
                 const prm = (loc && loc.parameter) || {};
                 const t = prm.track;
                 if (t) { document.getElementById('searchEmail').value = t; switchTab('track'); trackStatus(); }
+                if (prm.rate) rtOpen(prm.rate, prm.s);
                 svInit(!!prm.survey); // ?survey=1 → เปิดแบบประเมินทันที
             });
             else svInit(false);
@@ -1545,8 +1548,9 @@
         const dl = u => { const m = u.match(/[/]d[/]([\w-]+)/) || u.match(/[?&]id=([\w-]+)/); return m ? 'https://drive.google.com/uc?export=download&id=' + m[1] : u; };
         const btns = urls.map((u, j) => `<span class="inline-flex mr-1 mb-1 rounded text-xs font-bold bg-blue-50 text-blue-700 overflow-hidden"><a href="${ciEsc(u)}" target="_blank" rel="noopener" class="px-2 py-1 hover:bg-blue-100" title="เปิดดูไฟล์ ${j + 1}"><i class="fas fa-file mr-1"></i>ไฟล์ ${j + 1}</a><a href="${ciEsc(dl(u))}" target="_blank" rel="noopener" class="px-2 py-1 bg-blue-100 hover:bg-blue-200" title="ดาวน์โหลดไฟล์ ${j + 1}"><i class="fas fa-download"></i></a></span>`).join('');
         const ex = String(r.extra || '').trim();
-        return (btns ? `<div class="mt-1.5">${btns}</div>` : '') +
-            (ex && ex !== '-' ? `<div class="mt-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-gray-700 whitespace-pre-wrap" style="max-width:26rem"><b class="text-amber-700"><i class="fas fa-comment-dots mr-1"></i>รายละเอียดที่ขอ:</b>\n${ciEsc(ex)}</div>` : '');
+        const lab = r.detail === 'ขอเพิ่มแบบทดสอบ' ? 'รายละเอียดแบบทดสอบที่ขอ' : 'รายละเอียดที่ขอ';
+        return (ex && ex !== '-' ? `<div class="mt-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-gray-700 whitespace-pre-wrap" style="max-width:30rem"><b class="text-amber-700"><i class="fas fa-comment-dots mr-1"></i>${lab}:</b>\n${ciEsc(ex)}</div>` : '') +
+            (btns ? `<div class="mt-1.5"><span class="text-xs text-gray-500 mr-1"><i class="fas fa-paperclip"></i> ไฟล์แนบ:</span>${btns}</div>` : '');
     }
 
     function updateUI() {
@@ -3532,7 +3536,81 @@
         document.getElementById('dashTabSvc').classList.toggle('active', !s);
         document.getElementById('dashTabSv').classList.toggle('active', s);
         if (s && !silent && !svr.data) svrLoad();
+        if (s && !silent && !rt.data) rtLoad();
     }
+    /* ===== คะแนนดาว 5 ดวง (ไม่ระบุตัวตน) ===== */
+    const rt = { data: null, tok: '', stars: 0 };
+    function rtStarsHtml(n, big) { return [1, 2, 3, 4, 5].map(i => `<i class="fas fa-star" style="color:${i <= Math.round(n) ? '#f59e0b' : '#e5e7eb'}${big ? ';font-size:1.6rem' : ''}"></i>`).join(''); }
+    function rtLoad() {
+        const box = document.getElementById('rtBox'); if (!box || !isGAS) return;
+        box.innerHTML = '<div class="text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-1"></i> กำลังโหลดคะแนนดาว...</div>';
+        google.script.run.withSuccessHandler(d => { rt.data = d; rtRender(); }).withFailureHandler(e => { box.innerHTML = '<div class="text-red-500 text-sm">โหลดคะแนนดาวไม่สำเร็จ: ' + ciEsc(e && e.message || e) + '</div>'; })
+            .getRatingResults(adminToken || execToken);
+    }
+    function rtToggle(on) {
+        google.script.run.withSuccessHandler(v => { if (rt.data) rt.data.enabled = v; rtRender(); })
+            .withFailureHandler(e => { alert(e && e.message || e); rtRender(); }).setRatingEnabled(on, adminToken);
+    }
+    function rtRender() {
+        const d = rt.data, box = document.getElementById('rtBox'); if (!d || !box) return;
+        const TH_M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        const mx = Math.max(1, ...d.dist);
+        const svc = Object.keys(d.byService).sort((a, b) => d.byService[b].n - d.byService[a].n);
+        const months = Object.keys(d.byMonth).sort();
+        box.innerHTML = `<div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-star text-amber-500 mr-1"></i> คะแนนดาวหลังรับบริการ <span class="text-sm font-normal text-gray-400">(ไม่ระบุตัวตน)</span></h2>
+            <div class="flex items-center gap-2 no-print">${adminToken ? `<label class="flex items-center gap-2 text-sm font-bold cursor-pointer px-3 py-2 rounded-lg border ${d.enabled ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-50 border-gray-300 text-gray-500'}" title="เปิด = แนบดาวในอีเมลเมื่อคำขอเสร็จสิ้น และรับคะแนน · ปิด = ไม่แนบ ไม่รับคะแนน"><input type="checkbox" class="accent-green-600" ${d.enabled ? 'checked' : ''} onchange="rtToggle(this.checked)"> ${d.enabled ? 'เปิดใช้แบบประเมินดาว' : 'ปิดแบบประเมินดาว'}</label>` : ''}
+            <button class="btn btn-secondary" onclick="rtLoad()"><i class="fas fa-rotate"></i> รีเฟรช</button></div></div>
+            <p class="text-xs text-gray-500 -mt-2 mb-4">คำถาม: ท่านพึงพอใจต่อการให้บริการคำขอนี้ (ความรวดเร็ว ความถูกต้อง และการติดต่อประสานงาน) มากน้อยเพียงใด</p>
+            ${!d.total ? '<div class="text-gray-400">ยังไม่มีผู้ให้คะแนน (ลิงก์ดาวจะแนบในอีเมลเมื่อคำขอเสร็จสิ้น)</div>' : `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="text-center p-4 rounded-xl bg-amber-50"><div class="text-5xl font-bold text-amber-600">${d.avg.toFixed(2)}</div><div class="my-1">${rtStarsHtml(d.avg, true)}</div><div class="text-sm text-gray-500">จาก ${d.total} ความเห็น · เต็ม 5 ดาว</div></div>
+                <div class="md:col-span-2 space-y-1.5">${[5, 4, 3, 2, 1].map(n => `<div class="flex items-center gap-2 text-sm"><span class="w-12 shrink-0">${n} <i class="fas fa-star text-amber-400"></i></span><div class="flex-1 h-3 rounded-full bg-gray-100 overflow-hidden"><div class="h-3 bg-amber-400" style="width:${d.dist[n - 1] * 100 / mx}%"></div></div><span class="w-20 text-right text-gray-500">${d.dist[n - 1]} (${Math.round(d.dist[n - 1] * 100 / d.total)}%)</span></div>`).join('')}</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div><h3 class="font-bold text-gray-800 mb-2">คะแนนแยกตามประเภทบริการ</h3><table class="w-full text-sm"><thead><tr class="text-left text-gray-500 border-b"><th class="p-2">บริการ</th><th class="p-2 text-right">จำนวน</th><th class="p-2 text-right">เฉลี่ย</th></tr></thead><tbody>${svc.map(k => { const x = d.byService[k], a = x.sum / x.n; return `<tr class="border-b"><td class="p-2">${ciEsc(k)}</td><td class="p-2 text-right">${x.n}</td><td class="p-2 text-right whitespace-nowrap"><b>${a.toFixed(2)}</b> <i class="fas fa-star text-amber-400"></i></td></tr>`; }).join('')}</tbody></table></div>
+                <div><h3 class="font-bold text-gray-800 mb-2">แนวโน้มรายเดือน</h3><div style="height:220px"><canvas id="rtMonthChart"></canvas></div></div>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-2">ความคิดเห็น (${d.comments.length})</h3>
+            <div class="space-y-2 max-h-96 overflow-auto">${d.comments.map(c => `<div class="p-3 rounded-lg bg-slate-50 border text-sm"><div class="flex flex-wrap justify-between gap-2 mb-1"><span>${rtStarsHtml(c.stars)} <span class="text-gray-500 ml-1">${ciEsc(c.service)}</span></span><span class="text-xs text-gray-400">${ciEsc(c.date)}</span></div><div class="whitespace-pre-wrap text-gray-700">${ciEsc(c.comment)}</div></div>`).join('') || '<div class="text-gray-400 text-sm">ยังไม่มีความคิดเห็น</div>'}</div>`}`;
+        const cv = document.getElementById('rtMonthChart');
+        if (cv && typeof Chart !== 'undefined') {
+            if (dashCharts.rtMonthChart) dashCharts.rtMonthChart.destroy();
+            dashCharts.rtMonthChart = new Chart(cv, { data: { labels: months.map(m => { const p = m.split('-'); return TH_M[+p[1] - 1] + ' ' + String(+p[0] + 543).slice(2); }), datasets: [
+                { type: 'bar', label: 'จำนวนผู้ประเมิน', data: months.map(m => d.byMonth[m].n), backgroundColor: 'rgba(245,158,11,0.35)', borderRadius: 6, yAxisID: 'y' },
+                { type: 'line', label: 'ดาวเฉลี่ย', data: months.map(m => Math.round(d.byMonth[m].sum / d.byMonth[m].n * 100) / 100), borderColor: '#d97706', backgroundColor: '#d97706', tension: 0.3, yAxisID: 'y1' }] },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, y1: { position: 'right', min: 0, max: 5, grid: { drawOnChartArea: false } } } } });
+        }
+    }
+    /** เปิดจากลิงก์ดาวในอีเมล (?rate=...&s=1-5) → บันทึกทันที แล้วให้แก้ดาว/เพิ่มความคิดเห็นได้ */
+    function rtOpen(tok, s) {
+        rt.tok = String(tok || ''); rt.stars = Math.min(5, Math.max(0, parseInt(s, 10) || 0));
+        try { history.replaceState(null, '', location.pathname); } catch (e) {}
+        let m = document.getElementById('rtModal');
+        if (!m) { m = document.createElement('div'); m.id = 'rtModal'; m.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px'; document.body.appendChild(m); }
+        m.innerHTML = `<div class="bg-white rounded-2xl shadow-xl w-full p-6 text-center" style="max-width:440px">
+            <h3 class="text-xl font-bold text-gray-800 mb-1"><i class="fas fa-star text-amber-500 mr-1"></i> ประเมินความพึงพอใจ</h3>
+            <p class="text-sm text-gray-700 mb-1">ท่านพึงพอใจต่อการให้บริการคำขอนี้ (ความรวดเร็ว ความถูกต้อง และการติดต่อประสานงาน) มากน้อยเพียงใด</p>
+            <p class="text-xs text-gray-500 mb-3">ไม่ระบุตัวตน · ระบบไม่เก็บชื่อหรืออีเมลของท่าน</p>
+            <div id="rtStars" class="mb-2" style="font-size:2.2rem">${[1, 2, 3, 4, 5].map(i => `<button type="button" onclick="rtSend(${i})" aria-label="${i} ดาว" style="background:none;border:0;cursor:pointer;padding:0 2px"><i class="fas fa-star" style="color:${i <= rt.stars ? '#f59e0b' : '#e5e7eb'}"></i></button>`).join('')}</div>
+            <div id="rtMsg" class="text-sm text-gray-600 mb-3 min-h-5"></div>
+            <textarea id="rtComment" rows="3" maxlength="1000" class="form-input w-full mb-3" placeholder="ความคิดเห็น / ข้อเสนอแนะ (ไม่บังคับ)"></textarea>
+            <div class="flex gap-2 justify-center"><button type="button" class="btn btn-primary" onclick="rtSend(rt.stars, true)"><i class="fas fa-paper-plane"></i> ส่งความคิดเห็น</button>
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('rtModal').remove()">ปิด</button></div></div>`;
+        if (rt.stars) rtSend(rt.stars); else document.getElementById('rtMsg').textContent = 'กรุณาเลือกจำนวนดาว';
+    }
+    function rtSend(n, withComment) {
+        const msg = document.getElementById('rtMsg'); if (!msg) return;
+        if (!(n >= 1)) { msg.textContent = 'กรุณาเลือกจำนวนดาวก่อน'; return; }
+        rt.stars = n;
+        document.querySelectorAll('#rtStars i').forEach((el, i) => { el.style.color = i < n ? '#f59e0b' : '#e5e7eb'; });
+        msg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
+        const cm = withComment ? document.getElementById('rtComment').value : null;
+        google.script.run.withSuccessHandler(() => { msg.innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle"></i> บันทึก ${n} ดาวแล้ว ขอบคุณครับ/ค่ะ</span>` + (withComment ? '<br><span class="text-green-600">ได้รับความคิดเห็นแล้ว</span>' : '<br><span class="text-xs text-gray-500">เปลี่ยนจำนวนดาวหรือเพิ่มความคิดเห็นได้</span>'); })
+            .withFailureHandler(e => { msg.innerHTML = '<span class="text-red-600">' + ciEsc(e && e.message || e) + '</span>'; })
+            .submitRating(rt.tok, n, cm);
+    }
+
     function svrLoad(force) {
         if (!isGAS) return;
         document.getElementById('topProgress').style.display = 'block';
@@ -3964,9 +4042,9 @@
         renderBreakdownTables();
         csPrepare(data);
 
-        const systems = Object.keys(data.bySystem || {});
-        drawChart('chartBySystem', 'doughnut', systems, systems.map(s => data.bySystem[s]),
-            ['#6366f1','#10b981','#f59e0b','#ef4444','#06b6d4','#8b5cf6']);
+        const svcs = Object.keys(data.byDetailType || {}).sort((x, y) => data.byDetailType[y] - data.byDetailType[x]);
+        drawChart('chartBySystem', 'bar', svcs, svcs.map(s => data.byDetailType[s]),
+            ['#6366f1','#10b981','#f59e0b','#ef4444','#06b6d4','#8b5cf6'], true);
 
         const statuses = Object.keys(data.byStatus || {});
         const statusColorMap = { 'รออนุมัติ': '#818cf8', 'กำลังดำเนินการ': '#f59e0b', 'เสร็จสิ้น': '#10b981', 'ยกเลิก': '#94a3b8' };
@@ -3975,7 +4053,7 @@
 
         const months = Object.keys(data.byMonth || {}).sort();
         const TH_M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        drawChart('chartByMonth', 'line', months.map(m => { const p = m.split('-'); return p.length === 2 ? TH_M[+p[1] - 1] + ' ' + String(+p[0] + 543).slice(2) : m; }), months.map(m => data.byMonth[m]), ['#4f46e5']);
+        monthChart(months, data, TH_M);
 
         // ตารางสรุปรายผู้รับผิดชอบ
         const adminBody = document.getElementById('adminSummaryBody');
@@ -4073,6 +4151,29 @@
                 <td class="p-2 text-right font-bold">${groups[k]}</td>
             </tr>`;
         }).join('');
+    }
+
+    /** แนวโน้มรายเดือน: แท่ง = จำนวนคำขอ · เส้น = % เสร็จทันกำหนด · ป้ายด้านล่าง = วันทำการเฉลี่ยที่ใช้ */
+    function monthChart(months, data, TH_M) {
+        const ctx = document.getElementById('chartByMonth'); if (!ctx) return;
+        if (dashCharts.chartByMonth) dashCharts.chartByMonth.destroy();
+        const lab = m => { const p = m.split('-'); return p.length === 2 ? TH_M[+p[1] - 1] + ' ' + String(+p[0] + 543).slice(2) : m; };
+        const ms = data.byMonthSla || {};
+        const pct = months.map(m => { const x = ms[m]; return x && x.done ? Math.round(x.onTime * 100 / x.done) : null; });
+        const avg = months.map(m => { const x = ms[m]; return x && x.done ? Math.round(x.days / x.done * 10) / 10 : null; });
+        dashCharts.chartByMonth = new Chart(ctx, {
+            data: { labels: months.length ? months.map(lab) : ['ไม่มีข้อมูล'], datasets: [
+                { type: 'bar', label: 'จำนวนคำขอ', data: months.map(m => data.byMonth[m]), backgroundColor: 'rgba(99,102,241,0.55)', borderRadius: 6, yAxisID: 'y' },
+                { type: 'line', label: '% เสร็จทันกำหนด', data: pct, borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, spanGaps: true, yAxisID: 'y1' }] },
+            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                plugins: { tooltip: { callbacks: { afterBody: it => { const v = avg[it[0].dataIndex]; return v == null ? '' : 'ใช้เวลาเฉลี่ย ' + v + ' วันทำการ'; },
+                    label: c => c.dataset.label + ': ' + (c.raw == null ? '-' : c.raw + (c.dataset.yAxisID === 'y1' ? '%' : '')) } } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: 'คำขอ' } },
+                    y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: '% ทันกำหนด' } } } }
+        });
+        const chips = document.getElementById('monthSlaChips');
+        if (chips) chips.innerHTML = months.filter((m, i) => pct[i] != null).map(m => { const i = months.indexOf(m);
+            return `<span class="px-2 py-1 rounded-full bg-slate-100 text-slate-700"><b>${lab(m)}</b> · ทันกำหนด ${pct[i]}% · เฉลี่ย ${avg[i]} วันทำการ</span>`; }).join('') || '<span class="text-gray-400">ยังไม่มีงานที่เสร็จพร้อมวันที่เสร็จ</span>';
     }
 
     function drawChart(canvasId, type, labels, values, colors, horizontal) {
@@ -4298,7 +4399,7 @@
             ['รายวิชาที่มีคำขอ (ตามตัวกรองรายวิชา)', csGroups.filter(g => !g.noCourse).length],
             ['รายวิชาที่ยังไม่มีคำขอ (ตามตัวกรองรายวิชา)', csUnused.length],
             [],
-            ['คำขอแยกตามระบบ', 'จำนวน'], ...Object.entries(d.bySystem || {}),
+            ['คำขอแยกตามประเภทบริการ', 'จำนวน'], ...Object.entries(d.byDetailType || {}),
             [],
             ['คำขอแยกตามประเภทบริการ', 'จำนวน'], ...Object.entries(d.byDetailType || {}),
             [],
