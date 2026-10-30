@@ -815,15 +815,19 @@
 
                 <div id="boxUploadContent" class="hidden-step mb-5 p-5 bg-white border-2 border-emerald-200 rounded-xl">
                     <div class="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 leading-relaxed">
-                        <b><i class="fas fa-film mr-1"></i> กรณีเป็นไฟล์วิดีโอ (VDO)</b> ไม่ต้องอัปโหลด เนื่องจากไฟล์มีขนาดใหญ่ ให้แชร์เป็น<b>ลิงก์</b> (Google Drive / OneDrive / YouTube) แล้ววางในช่อง <b>"รายละเอียดเพิ่มเติมถึงเจ้าหน้าที่"</b> ด้านล่าง หรือ<b>นำไฟล์มาให้เจ้าหน้าที่</b>โดยตรง
+                        <b><i class="fas fa-film mr-1"></i> กรณีเป็นไฟล์วิดีโอ (VDO)</b> ไม่ต้องอัปโหลด เนื่องจากไฟล์มีขนาดใหญ่ ให้แชร์เป็น<b>ลิงก์</b> (Google Drive / OneDrive / YouTube) โดยเลือก <b>"แนบลิงก์"</b> แล้ววางในช่อง <b>"ลิงก์เนื้อหา"</b> หรือ<b>นำไฟล์มาให้เจ้าหน้าที่ผู้รับผิดชอบรายวิชา</b>โดยตรง
                     </div>
                     <div class="mb-4">
                         <div class="block text-sm font-bold text-emerald-800 mb-2">วิธีส่งเนื้อหา <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(เลือกได้มากกว่า 1 ข้อ)</span></div>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                             <label class="checkbox-card"><input type="checkbox" name="contentMethod" value="upload" checked> <span>📎 อัปโหลดไฟล์ (Word/PDF)</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="contentMethod" value="link"> <span>🔗 แนบลิงก์ (เช่น VDO)</span></label>
-                            <label class="checkbox-card"><input type="checkbox" name="contentMethod" value="bring"> <span>🤝 นำไฟล์มาให้เจ้าหน้าที่</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="contentMethod" value="link" onchange="document.getElementById('contentLinkWrap').classList.toggle('hidden',!this.checked)"> <span>🔗 แนบลิงก์ (เช่น VDO) Drive หรือ YouTube</span></label>
+                            <label class="checkbox-card"><input type="checkbox" name="contentMethod" value="bring"> <span>🤝 นำไฟล์มาให้เจ้าหน้าที่ผู้รับผิดชอบรายวิชา</span></label>
                         </div>
+                    </div>
+                    <div id="contentLinkWrap" class="hidden mb-4">
+                        <label class="block text-sm font-bold text-emerald-800 mb-2">ลิงก์เนื้อหา (Google Drive / YouTube) <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(1 บรรทัดต่อ 1 ลิงก์ · ตั้งค่าแชร์ให้เปิดดูได้)</span></label>
+                        <textarea id="contentLinks" rows="2" class="form-input bg-emerald-50/30" placeholder="https://drive.google.com/...&#10;https://youtu.be/..."></textarea>
                     </div>
                     <label class="block text-sm font-bold text-emerald-800 mb-2">ช่องอัปโหลด: ไฟล์เนื้อหา/บทเรียน <span class="text-red-500">*</span> <br><span class="text-xs text-gray-500 font-normal">รองรับ Word (.doc, .docx) และ PDF อัปโหลดได้ไม่เกิน 5 ไฟล์</span></label>
                     <input type="file" id="file_content" accept=".pdf,.doc,.docx" multiple class="form-input bg-emerald-50/30 cursor-pointer" onchange="validateFiles(this, 'content')">
@@ -1399,7 +1403,7 @@
                 <div class="sf-unit">หน่วยสื่อสารองค์กรและสารสนเทศ</div>
             </div>
         </div>
-        <div class="sf-author"><small>พัฒนาโดย</small><span>ดร.มงคล แปลงกาย และทีมe-learning</span></div>
+        <div class="sf-author"><small>ผู้จัดทำ</small><span>ดร.มงคล แปลงกาย</span></div>
     </div>
     <div class="sf-copy">© 2026 Ramathibodi School of Nursing, Mahidol University. All Rights Reserved.</div>
 </footer>
@@ -1695,8 +1699,7 @@
         'สาขาวิชาการพยาบาลมารดา-ทารกและการผดุงครรภ์', 'สาขาวิชาการพยาบาลจิตเวชและสุขภาพจิต', 'สาขาวิชาการพยาบาลสุขภาพชุมชน'];
     const MASTER_DEPTS = ['สาขาวิชาการพยาบาลเด็ก', 'สาขาวิชาการพยาบาลผู้ใหญ่และผู้สูงอายุ', 'สาขาวิชาการพยาบาลเวชปฏิบัติชุมชน',
         'สาขาวิชาการพยาบาลจิตเวชและสุขภาพจิต', 'สาขาวิชาการผดุงครรภ์', 'สาขาวิชาการพยาบาลเวชปฏิบัติผู้สูงอายุ', 'วิชาแกน วิชาเลือก และวิทยานิพนธ์'];
-    const STUDENT_SECTIONS = ['แยก Section A – 1 Link และ Section B – 1 Link',
-        'รวมเป็น 1 รายวิชา แต่เมื่อเข้าไปจะแยกเป็น Section A และ Section B', 'รวมเป็น 1 รายวิชา (ไม่แยก Section A / B)'];
+    const STUDENT_SECTIONS = ['แยก Section A – 1 Link และ Section B – 1 Link', 'รวมเป็น 1 รายวิชา แต่เมื่อเข้าไปจะแยกเป็น Section A และ Section B', 'รวมเป็น 1 รายวิชา (ไม่แยก Section A / B)', '1 รายวิชา (รวม Section A / B)', '1 รายวิชา (แยกเป็น Section A / B)', 'Section A', 'Section B', 'Section A1', 'Section A2', 'Section B1', 'Section B2'];
     const YEAR_LEVELS = ['1', '2', '3', '4'];
     let ACADEMIC_YEARS = ['2569', '2570'];   // ค่าเริ่มต้น (แทนที่ด้วยรายการจาก Admin เมื่อโหลดเสร็จ)
     let coursesLoaded = false;
@@ -1884,6 +1887,7 @@
         items.forEach((el, i) => { el.querySelector('.qz-num').textContent = 'รายการที่ ' + (i + 1); el.querySelector('.qz-del').classList.toggle('hidden', items.length < 2); });
         const b = document.getElementById('qzAddBtn'); if (b) b.classList.toggle('hidden', items.length >= QZ_MAX);
     }
+    const QZ_REVIEW = ['เห็นคะแนน พร้อมคำตอบหลังจากที่ทำเสร็จ', 'เห็นเฉพาะคะแนนหลังจากที่ทำเสร็จ', 'แสดงข้อ ถูก ผิด หลังจากทำแบบทดสอบ', 'เห็นคะแนนหลังปิดแบบทดสอบ (ตามวัน-เวลาสิ้นสุด)', 'แสดงเฉลย (คำตอบที่ถูก) หลังปิดแบบทดสอบ', 'แสดง Feedback รายข้อ หลังจากทำเสร็จ', 'ไม่แสดงคะแนนและคำตอบ (อาจารย์แจ้งผลเอง)'];
     function qzAdd() {
         const list = document.getElementById('qzList');
         if (list.querySelectorAll('.qz-item').length >= QZ_MAX) return;
@@ -1911,6 +1915,7 @@
                 ${fld('ประเภทข้อสอบ' + R, `<select class="form-input qz-qtype"><option value="">-- เลือกประเภท --</option>${QZ_QTYPES.map(t => `<option>${t}</option>`).join('')}</select>`, 'qz-qtype-wrap')}
                 ${fld('จำนวนครั้งที่ทำได้' + R, `<select class="form-input qz-attempts"><option value="">-- เลือก --</option>${[1, 2, 3, 4, 5].map(n => `<option value="${n}">${n} ครั้ง</option>`).join('')}<option value="ไม่จำกัด">ไม่จำกัด</option></select>`)}
                 ${fld('คะแนนเต็ม' + R, '<input type="number" min="0" step="any" class="form-input qz-score" placeholder="เช่น 20">')}
+                ${fld('การแสดงผลหลังทำแบบทดสอบเสร็จ' + R, `<select class="form-input qz-review"><option value="">-- เลือก --</option>${QZ_REVIEW.map(t => `<option>${t}</option>`).join('')}</select>`, 'qz-review-wrap sm:col-span-3')}
             </div>
             <div class="qz-assign hidden grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
                 ${fld('จำนวนไฟล์ที่นักศึกษาส่งได้' + R, `<select class="form-input qz-nfiles"><option value="">-- เลือก --</option>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<option value="${n}">${n} ไฟล์</option>`).join('')}</select>`)}
@@ -1934,6 +1939,7 @@
         // Forum ใช้ วัน/เวลา · จำนวนครั้ง · คะแนนเต็ม · ไฟล์ Word เหมือนแบบทดสอบ (ไม่มีประเภทข้อสอบ)
         el.querySelector('.qz-quiz').classList.toggle('hidden', t === 'assign');
         el.querySelector('.qz-qtype-wrap').classList.toggle('hidden', t !== 'quiz');
+        el.querySelector('.qz-review-wrap').classList.toggle('hidden', t !== 'quiz');
         el.querySelector('.qz-assign').classList.toggle('hidden', t !== 'assign');
         const inp = el.querySelector('input[type=file]'), fid = 'file_qz_' + u;
         if (t !== 'assign') { inp.accept = '.doc,.docx'; inp.dataset.mode = 'word'; el.querySelector('.qz-up-label').textContent = t === 'quiz' ? 'อัปโหลดไฟล์ต้นฉบับแบบทดสอบพร้อมเฉลย' : 'อัปโหลดไฟล์ต้นฉบับ'; el.querySelector('.qz-up-hint').textContent = '(Word .doc/.docx เท่านั้น ไม่เกิน 2 ไฟล์)'; }
@@ -1969,7 +1975,8 @@
                 r = (t === 'quiz' ? need('.qz-qtype', 'กรุณาเลือกประเภทข้อสอบ') : null) || need('.qz-attempts', 'กรุณาเลือกจำนวนครั้งที่ทำได้') || need('.qz-score', 'กรุณาระบุคะแนนเต็ม');
                 if (r) return r;
                 if (!(Number(g('.qz-score')) > 0)) return { err: n + 'คะแนนเต็มต้องมากกว่า 0', el: el.querySelector('.qz-score') };
-                line += '\n   ' + (t === 'quiz' ? 'ประเภท: ' + g('.qz-qtype') + ' · ' : '') + 'ทำได้: ' + (g('.qz-attempts') === 'ไม่จำกัด' ? 'ไม่จำกัด' : g('.qz-attempts') + ' ครั้ง') + ' · คะแนนเต็ม: ' + g('.qz-score');
+                if (t === 'quiz') { r = need('.qz-review', 'กรุณาเลือกการแสดงผลหลังทำแบบทดสอบเสร็จ'); if (r) return r; }
+                line += '\n   ' + (t === 'quiz' ? 'ประเภท: ' + g('.qz-qtype') + ' · ' : '') + 'ทำได้: ' + (g('.qz-attempts') === 'ไม่จำกัด' ? 'ไม่จำกัด' : g('.qz-attempts') + ' ครั้ง') + ' · คะแนนเต็ม: ' + g('.qz-score') + (t === 'quiz' ? '\n   แสดงผลหลังทำเสร็จ: ' + g('.qz-review') : '');
             }
             if (t === 'assign') {
                 r = need('.qz-nfiles', 'กรุณาเลือกจำนวนไฟล์ที่นักศึกษาส่งได้');
@@ -2016,12 +2023,14 @@
                 document.getElementById('boxUploadContent').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return alert('เลือก "อัปโหลดไฟล์" ไว้ กรุณาแนบไฟล์เนื้อหา/บทเรียน\n(ถ้าเป็นวิดีโอ ให้เลือก "แนบลิงก์" หรือ "นำไฟล์มาให้เจ้าหน้าที่" แทน)');
             }
-            if (cm.includes('link') && !/https?:[/][/]\S+/i.test(extraEl.value)) {
-                extraEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); extraEl.focus();
-                return alert('เลือก "แนบลิงก์" ไว้ กรุณาวางลิงก์ (ลิงก์ที่ขึ้นต้นด้วย http หรือ https) ในช่อง "รายละเอียดเพิ่มเติมถึงเจ้าหน้าที่"');
+            const lkEl = document.getElementById('contentLinks');
+            const links = (lkEl.value || '').split(/\s+/).filter(x => /^https?:[/][/]\S+/i.test(x));
+            if (cm.includes('link') && !links.length) {
+                lkEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); lkEl.focus();
+                return alert('เลือก "แนบลิงก์" ไว้ กรุณาวางลิงก์ Google Drive / YouTube (ขึ้นต้นด้วย http หรือ https) ในช่อง "ลิงก์เนื้อหา"');
             }
-            const lb = { upload: 'อัปโหลดไฟล์', link: 'แนบลิงก์ (ดูในรายละเอียด)', bring: 'จะนำไฟล์มาให้เจ้าหน้าที่' };
-            contentNote = '[วิธีส่งเนื้อหา: ' + cm.map(x => lb[x]).join(' / ') + ']';
+            const lb = { upload: 'อัปโหลดไฟล์', link: 'แนบลิงก์', bring: 'จะนำไฟล์มาให้เจ้าหน้าที่ผู้รับผิดชอบรายวิชา' };
+            contentNote = '[วิธีส่งเนื้อหา: ' + cm.map(x => lb[x]).join(' / ') + ']' + (cm.includes('link') ? '\nลิงก์เนื้อหา:\n' + links.join('\n') : '');
         }
 
         // ขอเพิ่มแบบทดสอบ: ตรวจรายละเอียดทุกรายการ แล้วสรุปเป็นข้อความแนบไปกับคำขอ
@@ -2080,6 +2089,7 @@
                 showSubmitSuccess(id, payload);
                 saveRequester(requesterInfo);
                 e.target.reset();
+                document.getElementById('contentLinkWrap').classList.add('hidden');
                 prefillRequester();
                 updateStepper();
                 fileStore = { 'file_tqf': [], 'file_students': [], 'file_content': [], 'file_quiz': [] };
