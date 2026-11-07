@@ -3626,13 +3626,13 @@
         if (s && !silent && !rt.data) rtLoad();
     }
     /* ===== คะแนนดาว 5 ดวง (ไม่ระบุตัวตน) ===== */
-    const rt = { data: null, tok: '', stars: 0 };
+    const rt = { data: null, tok: '', stars: 0, admin: '' };
     function rtStarsHtml(n, big) { return [1, 2, 3, 4, 5].map(i => `<i class="fas fa-star" style="color:${i <= Math.round(n) ? '#f59e0b' : '#e5e7eb'}${big ? ';font-size:1.6rem' : ''}"></i>`).join(''); }
     function rtLoad() {
         const box = document.getElementById('rtBox'); if (!box || !isGAS) return;
         box.innerHTML = '<div class="text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-1"></i> กำลังโหลดคะแนนดาว...</div>';
         google.script.run.withSuccessHandler(d => { rt.data = d; rtRender(); }).withFailureHandler(e => { box.innerHTML = '<div class="text-red-500 text-sm">โหลดคะแนนดาวไม่สำเร็จ: ' + ciEsc(e && e.message || e) + '</div>'; })
-            .getRatingResults(adminToken || execToken);
+            .getRatingResults(adminToken || execToken, rt.admin);
     }
     function rtToggle(on) {
         google.script.run.withSuccessHandler(v => { if (rt.data) rt.data.enabled = v; rtRender(); })
@@ -3643,31 +3643,115 @@
         const TH_M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
         const mx = Math.max(1, ...d.dist);
         const svc = Object.keys(d.byService).sort((a, b) => d.byService[b].n - d.byService[a].n);
+        const adm = Object.keys(d.byAdmin || {}).sort((a, b) => (d.byAdmin[b].sum / d.byAdmin[b].n) - (d.byAdmin[a].sum / d.byAdmin[a].n) || d.byAdmin[b].n - d.byAdmin[a].n);
         const months = Object.keys(d.byMonth).sort();
-        box.innerHTML = `<div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-star text-amber-500 mr-1"></i> คะแนนดาวหลังรับบริการ <span class="text-sm font-normal text-gray-400">(ไม่ระบุตัวตน)</span></h2>
-            <div class="flex items-center gap-2 no-print">${adminToken ? `<label class="flex items-center gap-2 text-sm font-bold cursor-pointer px-3 py-2 rounded-lg border ${d.enabled ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-50 border-gray-300 text-gray-500'}" title="เปิด = แนบดาวในอีเมลเมื่อคำขอเสร็จสิ้น และรับคะแนน · ปิด = ไม่แนบ ไม่รับคะแนน"><input type="checkbox" class="accent-green-600" ${d.enabled ? 'checked' : ''} onchange="rtToggle(this.checked)"> ${d.enabled ? 'เปิดใช้แบบประเมินดาว' : 'ปิดแบบประเมินดาว'}</label>` : ''}
-            <button class="btn btn-secondary" onclick="rtLoad()"><i class="fas fa-rotate"></i> รีเฟรช</button></div></div>
+        box.innerHTML = `<div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-star text-amber-500 mr-1"></i> คะแนนดาวหลังรับบริการ <span class="text-sm font-normal text-gray-400">(ไม่ระบุตัวตน)</span>${rt.admin ? `<span class="block text-base font-bold text-indigo-700 mt-1"><i class="fas fa-filter"></i> ผู้ดูแล: ${ciEsc(rt.admin)}</span>` : ''}</h2>
+            <div class="flex flex-wrap items-center gap-2 no-print"><label class="flex items-center gap-2 text-sm font-bold text-gray-700"><i class="fas fa-user-tie text-indigo-500"></i> ผู้ดูแล <select class="form-input py-2" style="width:auto;min-width:180px" onchange="rt.admin=this.value; rtLoad()"><option value="">ทุกคน</option>${(d.admins || []).map(a => `<option value="${ciEsc(a)}" ${a === rt.admin ? 'selected' : ''}>${ciEsc(a)}</option>`).join('')}</select></label>${adminToken ? `<label class="flex items-center gap-2 text-sm font-bold cursor-pointer px-3 py-2 rounded-lg border ${d.enabled ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-50 border-gray-300 text-gray-500'}" title="เปิด = แนบดาวในอีเมลเมื่อคำขอเสร็จสิ้น และรับคะแนน · ปิด = ไม่แนบ ไม่รับคะแนน"><input type="checkbox" class="accent-green-600" ${d.enabled ? 'checked' : ''} onchange="rtToggle(this.checked)"> ${d.enabled ? 'เปิดใช้แบบประเมินดาว' : 'ปิดแบบประเมินดาว'}</label>` : ''}
+            <button class="btn btn-secondary" onclick="rtLoad()"><i class="fas fa-rotate"></i> รีเฟรช</button>${d.total ? `<button class="btn btn-success" onclick="rtExport()"><i class="fas fa-file-excel"></i> ดาวน์โหลด Excel</button><button class="btn btn-secondary" onclick="rtPreview()"><i class="fas fa-eye"></i> พรีวิว</button><button class="btn btn-secondary" onclick="rtPrint()"><i class="fas fa-print"></i> พิมพ์ / PDF</button>` : ''}</div></div>
             <p class="text-xs text-gray-500 -mt-2 mb-4">คำถาม: ท่านพึงพอใจต่อการให้บริการคำขอนี้ (ความรวดเร็ว ความถูกต้อง และการติดต่อประสานงาน) มากน้อยเพียงใด</p>
-            ${!d.total ? '<div class="text-gray-400">ยังไม่มีผู้ให้คะแนน (ลิงก์ดาวจะแนบในอีเมลเมื่อคำขอเสร็จสิ้น)</div>' : `
+            ${!d.total ? `<div class="text-gray-400">${rt.admin ? 'ยังไม่มีผู้ให้คะแนนสำหรับผู้ดูแลที่เลือก' : 'ยังไม่มีผู้ให้คะแนน (ลิงก์ดาวจะแนบในอีเมลเมื่อคำขอเสร็จสิ้น)'}</div>` : `
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="text-center p-4 rounded-xl bg-amber-50"><div class="text-5xl font-bold text-amber-600">${d.avg.toFixed(2)}</div><div class="my-1">${rtStarsHtml(d.avg, true)}</div><div class="text-sm text-gray-500">จาก ${d.total} ความเห็น · เต็ม 5 ดาว</div></div>
                 <div class="md:col-span-2 space-y-1.5">${[5, 4, 3, 2, 1].map(n => `<div class="flex items-center gap-2 text-sm"><span class="w-12 shrink-0">${n} <i class="fas fa-star text-amber-400"></i></span><div class="flex-1 h-3 rounded-full bg-gray-100 overflow-hidden"><div class="h-3 bg-amber-400" style="width:${d.dist[n - 1] * 100 / mx}%"></div></div><span class="w-20 text-right text-gray-500">${d.dist[n - 1]} (${Math.round(d.dist[n - 1] * 100 / d.total)}%)</span></div>`).join('')}</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div><h3 class="font-bold text-gray-800 mb-2">คะแนนแยกตามประเภทบริการ</h3><table class="w-full text-sm"><thead><tr class="text-left text-gray-500 border-b"><th class="p-2">บริการ</th><th class="p-2 text-right">จำนวน</th><th class="p-2 text-right">เฉลี่ย</th></tr></thead><tbody>${svc.map(k => { const x = d.byService[k], a = x.sum / x.n; return `<tr class="border-b"><td class="p-2">${ciEsc(k)}</td><td class="p-2 text-right">${x.n}</td><td class="p-2 text-right whitespace-nowrap"><b>${a.toFixed(2)}</b> <i class="fas fa-star text-amber-400"></i></td></tr>`; }).join('')}</tbody></table></div>
-                <div><h3 class="font-bold text-gray-800 mb-2">แนวโน้มรายเดือน</h3><div style="height:220px"><canvas id="rtMonthChart"></canvas></div></div>
+                <div><h3 class="font-bold text-gray-800 mb-2">แนวโน้มรายเดือน <span class="text-xs font-normal text-gray-500">(ร้อยละผู้ให้ 4–5 ดาว · เขียว = ถึงเป้าหมาย 80% · ส้ม = ต่ำกว่าเป้าหมาย)</span></h3><div style="height:260px"><canvas id="rtMonthChart"></canvas></div></div>
             </div>
+            <div class="mb-6"><h3 class="font-bold text-gray-800 mb-2">คะแนนแยกตามผู้ดูแลคำขอ (admin)</h3><table class="w-full text-sm"><thead><tr class="text-left text-gray-500 border-b"><th class="p-2">ผู้ดูแล</th><th class="p-2 text-right">จำนวน</th><th class="p-2 text-right">ร้อยละพึงพอใจ (4–5 ดาว)</th><th class="p-2 text-right">เฉลี่ย</th></tr></thead><tbody>${adm.map(k => { const x = d.byAdmin[k], a = x.sum / x.n; return `<tr class="border-b ${k === rt.admin ? 'bg-indigo-50 font-bold' : ''}"><td class="p-2">${ciEsc(k)}</td><td class="p-2 text-right">${x.n}</td><td class="p-2 text-right whitespace-nowrap">${rtPct(x)}</td><td class="p-2 text-right whitespace-nowrap">${rtStarsHtml(a)} <b>${a.toFixed(2)}</b></td></tr>`; }).join('') || '<tr><td class="p-2 text-gray-400" colspan="4">ยังไม่มีข้อมูล</td></tr>'}</tbody></table></div>
             <h3 class="font-bold text-gray-800 mb-2">ความคิดเห็น (${d.comments.length})</h3>
-            <div class="space-y-2 max-h-96 overflow-auto">${d.comments.map(c => `<div class="p-3 rounded-lg bg-slate-50 border text-sm"><div class="flex flex-wrap justify-between gap-2 mb-1"><span>${rtStarsHtml(c.stars)} <span class="text-gray-500 ml-1">${ciEsc(c.service)}</span></span><span class="text-xs text-gray-400">${ciEsc(c.date)}</span></div><div class="whitespace-pre-wrap text-gray-700">${ciEsc(c.comment)}</div></div>`).join('') || '<div class="text-gray-400 text-sm">ยังไม่มีความคิดเห็น</div>'}</div>`}`;
+            <div class="space-y-2 max-h-96 overflow-auto">${d.comments.map(c => `<div class="p-3 rounded-lg bg-slate-50 border text-sm"><div class="flex flex-wrap justify-between gap-2 mb-1"><span>${rtStarsHtml(c.stars)} <span class="text-gray-500 ml-1">${ciEsc(c.service)}</span>${c.admin ? `<span class="text-gray-500"> · <i class="fas fa-user-tie"></i> ${ciEsc(c.admin)}</span>` : ''}</span><span class="text-xs text-gray-400">${ciEsc(c.date)}</span></div><div class="whitespace-pre-wrap text-gray-700">${ciEsc(c.comment)}</div></div>`).join('') || '<div class="text-gray-400 text-sm">ยังไม่มีความคิดเห็น</div>'}</div>`}`;
         const cv = document.getElementById('rtMonthChart');
         if (cv && typeof Chart !== 'undefined') {
             if (dashCharts.rtMonthChart) dashCharts.rtMonthChart.destroy();
-            dashCharts.rtMonthChart = new Chart(cv, { data: { labels: months.map(m => { const p = m.split('-'); return TH_M[+p[1] - 1] + ' ' + String(+p[0] + 543).slice(2); }), datasets: [
-                { type: 'bar', label: 'จำนวนผู้ประเมิน', data: months.map(m => d.byMonth[m].n), backgroundColor: 'rgba(245,158,11,0.35)', borderRadius: 6, yAxisID: 'y' },
-                { type: 'line', label: 'ดาวเฉลี่ย', data: months.map(m => Math.round(d.byMonth[m].sum / d.byMonth[m].n * 100) / 100), borderColor: '#d97706', backgroundColor: '#d97706', tension: 0.3, yAxisID: 'y1' }] },
-                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, y1: { position: 'right', min: 0, max: 5, grid: { drawOnChartArea: false } } } } });
+            // แท่งร้อยละพึงพอใจรายเดือน (ผู้ให้ 4–5 ดาว ÷ ผู้ประเมินทั้งหมด) + เส้นเป้าหมาย 80%
+            const RT_GOAL = 80;
+            const mPct = months.map(m => { const b = d.byMonth[m], t = b.dist || [0, 0, 0, 0, 0]; return Math.round((t[3] + t[4]) * 1000 / b.n) / 10; });
+            const pctTop = { id: 'rtPctTop', afterDatasetsDraw(c) {
+                const x = c.scales.x, y = c.scales.y, g = c.ctx; g.save();
+                const gy = y.getPixelForValue(RT_GOAL); g.strokeStyle = '#dc2626'; g.lineWidth = 1.5; g.setLineDash([6, 4]);
+                g.beginPath(); g.moveTo(c.chartArea.left, gy); g.lineTo(c.chartArea.right, gy); g.stroke(); g.setLineDash([]);
+                g.font = '600 12px Kanit, sans-serif'; g.fillStyle = '#dc2626'; g.textAlign = 'right'; g.textBaseline = 'bottom'; g.strokeStyle = '#fff'; g.lineWidth = 4; g.lineJoin = 'round'; g.strokeText('เป้าหมาย ' + RT_GOAL + '%', c.chartArea.right, gy - 2); g.fillText('เป้าหมาย ' + RT_GOAL + '%', c.chartArea.right, gy - 2);
+                g.font = '600 15px Kanit, sans-serif'; g.textAlign = 'center';
+                mPct.forEach((v, i) => { g.fillStyle = v >= RT_GOAL ? '#15803d' : '#c2410c'; g.fillText(v + '%', x.getPixelForValue(i), y.getPixelForValue(v) - 4); });
+                g.restore(); } };
+            dashCharts.rtMonthChart = new Chart(cv, { type: 'bar', plugins: [pctTop], data: {
+                labels: months.map(m => { const p = m.split('-'); return [TH_M[+p[1] - 1] + ' ' + String(+p[0] + 543).slice(2), d.byMonth[m].n + ' คน']; }),
+                datasets: [{ label: 'ร้อยละพึงพอใจ (4–5 ดาว)', data: mPct, maxBarThickness: 64, borderRadius: 6, backgroundColor: mPct.map(v => v >= RT_GOAL ? '#22c55e' : '#fb923c') }] },
+                options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 24 } },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: t => { const m = months[t.dataIndex], b = d.byMonth[m]; return ' พึงพอใจ ' + t.parsed.y + '% (' + ((b.dist || [])[3] + (b.dist || [])[4]) + ' จาก ' + b.n + ' คน) · ดาวเฉลี่ย ' + (b.sum / b.n).toFixed(2); } } } },
+                    scales: { x: { grid: { display: false } }, y: { min: 0, max: 100, ticks: { stepSize: 20, callback: v => v + '%' } } } } });
         }
+    }
+    /** ร้อยละพึงพอใจ = จำนวน 4–5 ดาว ÷ จำนวนทั้งหมด × 100 */
+    function rtPct(x) { return x && x.n ? (Math.round((x.sat || 0) * 1000 / x.n) / 10).toFixed(1) + '%' : '-'; }
+    /** รายงานคะแนนดาว (ใช้ร่วมกัน: พรีวิว / พิมพ์ / PDF) ตามตัวกรองผู้ดูแลที่เลือก */
+    function rtReportHtml() {
+        const d = rt.data; if (!d) return '';
+        const e = ciEsc, TH_M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        const st = n => '★★★★★'.slice(0, Math.round(n)) + '<span style="color:#d1d5db">' + '★★★★★'.slice(Math.round(n)) + '</span>';
+        const sat = d.dist[3] + d.dist[4], pAll = d.total ? (Math.round(sat * 1000 / d.total) / 10).toFixed(1) + '%' : '-';
+        const svc = Object.keys(d.byService).sort((a, b) => d.byService[b].n - d.byService[a].n);
+        const adm = Object.keys(d.byAdmin || {}).sort((a, b) => (d.byAdmin[b].sum / d.byAdmin[b].n) - (d.byAdmin[a].sum / d.byAdmin[a].n) || d.byAdmin[b].n - d.byAdmin[a].n);
+        const months = Object.keys(d.byMonth).sort();
+        const cv = document.getElementById('rtMonthChart'); let img = ''; try { if (cv && months.length) img = cv.toDataURL('image/png'); } catch (x) {}
+        const now = new Date().toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'short' });
+        return `<!doctype html><html lang="th"><head><meta charset="utf-8"><title>รายงานคะแนนดาวหลังรับบริการ</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>@page{size:A4;margin:14mm}body{font-family:'Kanit',sans-serif;font-weight:300;color:#1f2937;font-size:12.5px;margin:0;padding:18px;background:#fff}h1{font-size:19px;font-weight:600;margin:0 0 2px}h2{font-size:14.5px;font-weight:600;margin:18px 0 6px;color:#3730a3;page-break-after:avoid;break-after:avoid}.sub{color:#4b5563;margin:0}.meta{color:#6b7280;font-size:11.5px;margin-top:4px}
+table{width:100%;border-collapse:collapse;page-break-inside:auto}th,td{border:1px solid #d1d5db;padding:5px 8px;text-align:left}th{background:#eef2ff;font-weight:600}td.r,th.r{text-align:right}tr{page-break-inside:avoid}.star{color:#f59e0b;letter-spacing:1px}
+.kpi{display:flex;gap:10px;margin-top:12px}.k{flex:1;border:1px solid #fde68a;background:#fffbeb;border-radius:8px;padding:8px 10px;text-align:center}.k b{display:block;font-size:22px;font-weight:600;color:#b45309}.hl td{background:#eef2ff;font-weight:600}
+.c{border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;margin-bottom:6px;page-break-inside:avoid}.c small{color:#6b7280}img{max-width:100%;max-height:230px;display:block;margin:4px auto;page-break-inside:avoid}</style></head><body>
+<h1>รายงานคะแนนดาวหลังรับบริการ Smart e-Learning RSON</h1>
+<p class="sub">โรงเรียนพยาบาลรามาธิบดี คณะแพทยศาสตร์โรงพยาบาลรามาธิบดี มหาวิทยาลัยมหิดล</p>
+<p class="meta">ผู้ดูแลคำขอ: <b>${rt.admin ? e(rt.admin) : 'ทุกคน'}</b> · คำถาม: ท่านพึงพอใจต่อการให้บริการคำขอนี้ (ความรวดเร็ว ความถูกต้อง และการติดต่อประสานงาน) มากน้อยเพียงใด · ไม่ระบุตัวตนผู้ประเมิน · พิมพ์เมื่อ ${e(now)}</p>
+<div class="kpi"><div class="k"><b>${d.avg.toFixed(2)}</b>ค่าเฉลี่ย (เต็ม 5 ดาว)<br><span class="star">${st(d.avg)}</span></div><div class="k"><b>${d.total}</b>จำนวนผู้ประเมิน</div><div class="k"><b>${pAll}</b>ร้อยละพึงพอใจ (4–5 ดาว)</div></div>
+<h2>การกระจายคะแนน</h2><table><tr><th>คะแนน</th><th class="r">จำนวน</th><th class="r">ร้อยละ</th></tr>${[5, 4, 3, 2, 1].map(n => `<tr><td><span class="star">${st(n)}</span> ${n} ดาว</td><td class="r">${d.dist[n - 1]}</td><td class="r">${d.total ? (d.dist[n - 1] * 100 / d.total).toFixed(1) : '0.0'}%</td></tr>`).join('')}</table>
+<h2>คะแนนแยกตามผู้ดูแลคำขอ (admin)</h2><table><tr><th>ผู้ดูแล</th><th class="r">จำนวน</th><th class="r">ร้อยละพึงพอใจ (4–5 ดาว)</th><th class="r">เฉลี่ย</th></tr>${adm.map(k => { const x = d.byAdmin[k], a = x.sum / x.n; return `<tr class="${k === rt.admin ? 'hl' : ''}"><td>${e(k)}</td><td class="r">${x.n}</td><td class="r">${rtPct(x)}</td><td class="r"><span class="star">${st(a)}</span> ${a.toFixed(2)}</td></tr>`; }).join('') || '<tr><td colspan="4">ยังไม่มีข้อมูล</td></tr>'}</table>
+<h2>คะแนนแยกตามประเภทบริการ</h2><table><tr><th>บริการ</th><th class="r">จำนวน</th><th class="r">เฉลี่ย</th></tr>${svc.map(k => { const x = d.byService[k], a = x.sum / x.n; return `<tr><td>${e(k)}</td><td class="r">${x.n}</td><td class="r">${a.toFixed(2)}</td></tr>`; }).join('')}</table>
+<h2>แนวโน้มรายเดือน</h2>${img ? `<img src="${img}" alt="กราฟแนวโน้มรายเดือน">` : ''}<table><tr><th>เดือน</th><th class="r">จำนวนผู้ประเมิน</th><th class="r">ดาวเฉลี่ย</th></tr>${months.map(m => { const p = m.split('-'), x = d.byMonth[m]; return `<tr><td>${TH_M[+p[1] - 1]} ${+p[0] + 543}</td><td class="r">${x.n}</td><td class="r">${(x.sum / x.n).toFixed(2)}</td></tr>`; }).join('')}</table>
+<h2>ความคิดเห็น (${d.comments.length})</h2>${d.comments.map(c => `<div class="c"><span class="star">${st(c.stars)}</span> <small>${e(c.service)}${c.admin ? ' · ' + e(c.admin) : ''} · ${e(c.date)}</small><div>${e(c.comment).replace(/\n/g, '<br>')}</div></div>`).join('') || '<p class="meta">ยังไม่มีความคิดเห็น</p>'}
+</body></html>`;
+    }
+    function rtPreview() {
+        const h = rtReportHtml(); if (!h) return;
+        let m = document.getElementById('rtPrev');
+        if (!m) { m = document.createElement('div'); m.id = 'rtPrev'; m.className = 'no-print'; m.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:16px'; document.body.appendChild(m); }
+        m.innerHTML = `<div class="bg-white rounded-2xl shadow-xl w-full flex flex-col" style="max-width:900px;height:92vh">
+            <div class="flex flex-wrap justify-between items-center gap-2 p-3 border-b"><b class="text-gray-800"><i class="fas fa-eye text-indigo-500 mr-1"></i> พรีวิวรายงานคะแนนดาว${rt.admin ? ' — ' + ciEsc(rt.admin) : ''}</b>
+            <div class="flex gap-2"><button class="btn btn-primary" onclick="rtPrint()"><i class="fas fa-print"></i> พิมพ์ / PDF</button><button class="btn btn-secondary" onclick="document.getElementById('rtPrev').remove()">ปิด</button></div></div>
+            <iframe id="rtPrevFrame" title="พรีวิวรายงาน" style="flex:1;border:0;width:100%;background:#f1f5f9"></iframe></div>`;
+        document.getElementById('rtPrevFrame').srcdoc = h;
+    }
+    function rtPrint() {
+        const h = rtReportHtml(); if (!h) return;
+        let f = document.getElementById('rtPrintFrame'); if (f) f.remove();
+        f = document.createElement('iframe'); f.id = 'rtPrintFrame'; f.setAttribute('aria-hidden', 'true');
+        f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+        f.onload = () => setTimeout(() => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (x) { uiAlert('พิมพ์ไม่สำเร็จ: ' + (x.message || x), 'error'); } }, 600);
+        document.body.appendChild(f); f.srcdoc = h;
+    }
+    function rtExport() {
+        const d = rt.data; if (!d || !d.total) return uiAlert('ยังไม่มีข้อมูลคะแนนดาว', 'info');
+        const r2 = v => Math.round(v * 100) / 100, pc = (a, b) => b ? Math.round(a * 1000 / b) / 10 : 0;
+        const sat = d.dist[3] + d.dist[4];
+        const summary = [['รายงานคะแนนดาวหลังรับบริการ Smart e-Learning RSON'], ['ผู้ดูแลคำขอ', rt.admin || 'ทุกคน'], ['วันที่ออกรายงาน', new Date().toLocaleString('th-TH')], [],
+            ['ตัวชี้วัด', 'ค่า'], ['จำนวนผู้ประเมิน', d.total], ['ค่าเฉลี่ย (เต็ม 5 ดาว)', d.avg], ['ร้อยละพึงพอใจ (4–5 ดาว)', pc(sat, d.total)], [],
+            ['คะแนน', 'จำนวน', 'ร้อยละ']].concat([5, 4, 3, 2, 1].map(n => [n + ' ดาว', d.dist[n - 1], pc(d.dist[n - 1], d.total)]));
+        const adm = [['ผู้ดูแลคำขอ (admin)', 'จำนวน', 'ร้อยละพึงพอใจ (4–5 ดาว)', 'ค่าเฉลี่ย']].concat(Object.keys(d.byAdmin || {}).sort((a, b) => (d.byAdmin[b].sum / d.byAdmin[b].n) - (d.byAdmin[a].sum / d.byAdmin[a].n) || d.byAdmin[b].n - d.byAdmin[a].n).map(k => { const x = d.byAdmin[k]; return [k, x.n, pc(x.sat || 0, x.n), r2(x.sum / x.n)]; }));
+        const svc = [['ประเภทบริการ', 'จำนวน', 'ค่าเฉลี่ย']].concat(Object.keys(d.byService).map(k => { const x = d.byService[k]; return [k, x.n, r2(x.sum / x.n)]; }));
+        const mon = [['เดือน (ค.ศ.)', 'จำนวนผู้ประเมิน', 'ดาวเฉลี่ย']].concat(Object.keys(d.byMonth).sort().map(m => [m, d.byMonth[m].n, r2(d.byMonth[m].sum / d.byMonth[m].n)]));
+        const cm = [['วันที่', 'คะแนน (ดาว)', 'ประเภทบริการ', 'ผู้ดูแลคำขอ', 'ความคิดเห็น']].concat(d.comments.map(c => [c.date, c.stars, c.service, c.admin || '', c.comment]));
+        const fname = 'คะแนนดาวหลังรับบริการ_' + (rt.admin ? rt.admin.replace(/\s+/g, '_') + '_' : '') + new Date().toLocaleDateString('sv-SE');
+        if (typeof XLSX === 'undefined') {
+            const csv = adm.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })); a.download = fname + '.csv'; document.body.appendChild(a); a.click(); a.remove(); return;
+        }
+        const wb = XLSX.utils.book_new();
+        const add = (rows, name, w) => { const ws = XLSX.utils.aoa_to_sheet(rows); ws['!cols'] = w.map(x => ({ wch: x })); XLSX.utils.book_append_sheet(wb, ws, name); };
+        add(summary, 'สรุป', [34, 30, 10]); add(adm, 'แยกตามผู้ดูแล', [30, 8, 22, 10]); add(svc, 'แยกตามบริการ', [30, 8, 10]);
+        add(mon, 'รายเดือน', [14, 16, 10]); add(cm, 'ความคิดเห็น', [12, 11, 26, 26, 70]);
+        XLSX.writeFile(wb, fname + '.xlsx');
     }
     /** เปิดจากลิงก์ดาวในอีเมล (?rate=...&s=1-5) → บันทึกทันที แล้วให้แก้ดาว/เพิ่มความคิดเห็นได้ */
     function rtOpen(tok, s) {
@@ -3678,7 +3762,8 @@
         m.innerHTML = `<div class="bg-white rounded-2xl shadow-xl w-full p-6 text-center" style="max-width:440px">
             <h3 class="text-xl font-bold text-gray-800 mb-1"><i class="fas fa-star text-amber-500 mr-1"></i> ประเมินความพึงพอใจ</h3>
             <p class="text-sm text-gray-700 mb-1">ท่านพึงพอใจต่อการให้บริการคำขอนี้ (ความรวดเร็ว ความถูกต้อง และการติดต่อประสานงาน) มากน้อยเพียงใด</p>
-            <p class="text-xs text-gray-500 mb-3">ไม่ระบุตัวตน · ระบบไม่เก็บชื่อหรืออีเมลของท่าน</p>
+            <p class="text-xs text-gray-500 mb-1">ไม่ระบุตัวตน · ระบบไม่เก็บชื่อหรืออีเมลของท่าน</p>
+            <p id="rtWho" class="text-sm text-indigo-700 font-bold mb-3 min-h-5"></p>
             <div id="rtStars" class="mb-2" style="font-size:2.2rem">${[1, 2, 3, 4, 5].map(i => `<button type="button" onclick="rtSend(${i})" aria-label="${i} ดาว" style="background:none;border:0;cursor:pointer;padding:0 2px"><i class="fas fa-star" style="color:${i <= rt.stars ? '#f59e0b' : '#e5e7eb'}"></i></button>`).join('')}</div>
             <div id="rtMsg" class="text-sm text-gray-600 mb-3 min-h-5"></div>
             <textarea id="rtComment" rows="3" maxlength="1000" class="form-input w-full mb-3" placeholder="ความคิดเห็น / ข้อเสนอแนะ (ไม่บังคับ)"></textarea>
@@ -3693,7 +3778,7 @@
         document.querySelectorAll('#rtStars i').forEach((el, i) => { el.style.color = i < n ? '#f59e0b' : '#e5e7eb'; });
         msg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
         const cm = withComment ? document.getElementById('rtComment').value : null;
-        google.script.run.withSuccessHandler(() => { msg.innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle"></i> บันทึก ${n} ดาวแล้ว ขอบคุณครับ/ค่ะ</span>` + (withComment ? '<br><span class="text-green-600">ได้รับความคิดเห็นแล้ว</span>' : '<br><span class="text-xs text-gray-500">เปลี่ยนจำนวนดาวหรือเพิ่มความคิดเห็นได้</span>'); })
+        google.script.run.withSuccessHandler(r => { const w = document.getElementById('rtWho'); if (w && r && r.admin) w.innerHTML = '<i class="fas fa-user-tie"></i> ผู้ดูแลคำขอนี้: ' + ciEsc(r.admin); msg.innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle"></i> บันทึก ${n} ดาวแล้ว ขอบคุณครับ/ค่ะ</span>` + (withComment ? '<br><span class="text-green-600">ได้รับความคิดเห็นแล้ว</span>' : '<br><span class="text-xs text-gray-500">เปลี่ยนจำนวนดาวหรือเพิ่มความคิดเห็นได้</span>'); })
             .withFailureHandler(e => { msg.innerHTML = '<span class="text-red-600">' + ciEsc(e && e.message || e) + '</span>'; })
             .submitRating(rt.tok, n, cm);
     }
