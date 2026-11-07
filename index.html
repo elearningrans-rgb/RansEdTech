@@ -422,6 +422,16 @@
         .site-footer { background: #0b1f3f !important; } .site-footer .sf-copy { background: #081830 !important; }
         #reqHero { background: radial-gradient(900px 400px at 90% -20%, rgba(249,115,22,.22), transparent 60%), linear-gradient(135deg, #123a73, #1d4f94 60%, #2a62ab); color: #fff; text-align: center; padding: 2.4rem 1rem 2.2rem; position: relative; overflow: hidden; }
         #reqHero h2 { font-size: 2rem; font-weight: 700; margin: 0; }
+        /* ขั้นตอน 3 ขั้น (การ์ดกระจก + ไอคอนเรืองแสง + STEP + เส้นประ) — ย่อขนาดตามจอ แถวเดียวเสมอ */
+        #reqHero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 28px 28px; -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%); }
+        #reqHero > * { position: relative; }
+        #reqHero .hs { display: flex; justify-content: center; align-items: center; margin: 1rem auto 0; max-width: 100%; }
+        #reqHero .hs-c { display: flex; align-items: center; gap: .65rem; padding: .45rem 1rem .45rem .5rem; border-radius: 14px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); text-align: left; min-width: 0; }
+        #reqHero .hs-d { flex: none; width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #f97316, #fb923c); display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #fff; box-shadow: 0 0 16px rgba(249,115,22,.45); }
+        #reqHero .hs-t { font-size: .98rem; line-height: 1.25; color: #fff; }
+        #reqHero .hs-t small { display: block; font-size: .66rem; letter-spacing: .14em; color: #93c5fd; line-height: 1.1; }
+        #reqHero .hs-ln { flex: none; width: 46px; height: 2px; position: relative; background: repeating-linear-gradient(90deg, #fdba74 0 6px, transparent 6px 11px); }
+        #reqHero .hs-ln::after { content: ""; position: absolute; right: -2px; top: -4px; border: 5px solid transparent; border-left: 7px solid #fdba74; }
         #reqHero p { margin: .4rem 0 0; color: #d6e3f7; font-size: 1.02rem; }
         #reqHero .wz-tag { display: inline-block; margin-top: .9rem; padding: .15rem 1rem; border-radius: .8rem; background: rgba(11,31,63,.55); }
         #reqHero .wz-tag span { font-weight: 700; font-size: 1.55rem; background: linear-gradient(90deg, #f97316, #fdba74); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -468,8 +478,17 @@
         .wz-info .bx { background: #fff; border-radius: 1.3rem; max-width: 46rem; width: 100%; padding: 1.6rem; max-height: 92vh; overflow: auto; }
         .wz-info .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.4rem; }
         .wz-info .st { text-align: center; } .wz-info .st .wz-ic { margin: 0 auto .6rem; } .wz-info .st b { display: block; color: #0d2647; } .wz-info .st small { color: #64748b; line-height: 1.5; display: block; }
+        @media (max-width: 370px) {
+            html #reqHero .hs-c { gap: .25rem; padding: .25rem .3rem .25rem .25rem; } html #reqHero .hs-d { width: 20px; height: 20px; font-size: .58rem; border-radius: 6px; }
+            html #reqHero .hs-t { font-size: .6rem; } html #reqHero .hs-t small { font-size: .42rem; } html #reqHero .hs-ln { width: 7px; } html #reqHero .hs-ln::after { display: none; }
+        }
         @media (max-width: 640px) {
             #reqHero { padding: 1.6rem 1rem 1.5rem; } #reqHero h2 { font-size: 1.45rem; } #reqHero p { font-size: .9rem; } #reqHero .wz-tag span { font-size: 1.2rem; }
+            #reqHero .hs-c { gap: .35rem; padding: .3rem .45rem .3rem .3rem; border-radius: 10px; }
+            #reqHero .hs-d { width: 26px; height: 26px; border-radius: 8px; font-size: .7rem; }
+            #reqHero .hs-t { font-size: .72rem; line-height: 1.2; } #reqHero .hs-t small { font-size: .5rem; letter-spacing: .08em; }
+            #reqHero .hs-ln { width: 12px; } #reqHero .hs-ln::after { right: -3px; top: -3px; border-width: 4px; border-left-width: 5px; }
+            #reqHero .hs-t, #reqHero .hs-t small { white-space: nowrap; }
             .wz-steps .lb { display: none; }
             #sec2 > .grid { grid-template-columns: 1fr; gap: .8rem; }
             .wz-tile.sys { flex-direction: row !important; text-align: left !important; min-height: 0 !important; padding: 1rem !important; gap: 1rem !important; justify-content: flex-start !important; }
@@ -673,7 +692,11 @@
 
 <section id="reqHero" class="no-print">
     <h2>ขอใช้บริการ e-Learning</h2>
-    <p>เลือกระบบ → เลือกบริการ → กรอกข้อมูลและส่ง</p>
+    <div class="hs" aria-label="เลือกระบบ → เลือกบริการ → กรอกข้อมูลและส่ง">
+        <div class="hs-c"><span class="hs-d"><i class="fas fa-server"></i></span><span class="hs-t"><small>STEP 01</small>เลือกระบบ</span></div><span class="hs-ln"></span>
+        <div class="hs-c"><span class="hs-d"><i class="fas fa-layer-group"></i></span><span class="hs-t"><small>STEP 02</small>เลือกบริการ</span></div><span class="hs-ln"></span>
+        <div class="hs-c"><span class="hs-d"><i class="fas fa-paper-plane"></i></span><span class="hs-t"><small>STEP 03</small>กรอกข้อมูลและส่ง</span></div>
+    </div>
     <div class="wz-tag"><span>ง่าย ครบ จบในที่เดียว</span></div>
 </section>
 <main class="container mx-auto px-4 py-8 max-w-5xl flex-grow">
