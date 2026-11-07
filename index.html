@@ -808,9 +808,25 @@
                 </div>
 
                 <div id="boxUploadStudents" class="hidden-step mb-5 p-5 bg-white border-2 border-purple-200 rounded-xl">
+                    <div class="block text-sm font-bold text-purple-800 mb-2">รายชื่อนักศึกษา/อาจารย์ <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(เลือก 1 วิธี)</span></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                        <label class="checkbox-card"><input type="radio" name="stuMethod" value="upload" checked onchange="stuMethodUI()"> <span>📎 อัปโหลดไฟล์</span></label>
+                        <label class="checkbox-card"><input type="radio" name="stuMethod" value="type" onchange="stuMethodUI()"> <span>✍️ พิมพ์อีเมลเอง (1–2 คน)</span></label>
+                        <label class="checkbox-card" id="stuLaterOpt"><input type="radio" name="stuMethod" value="later" onchange="stuMethodUI()"> <span>⏳ ยังไม่มีรายชื่อ (ส่งภายหลัง)</span></label>
+                    </div>
+                    <div id="stuUploadWrap">
                     <label class="block text-sm font-bold text-purple-800 mb-2">ช่องอัปโหลด: รายชื่อนักศึกษา/อาจารย์ <span class="text-red-500">*</span> <br><span class="text-xs text-gray-500 font-normal">รองรับ Word, Excel, PDF อัปโหลดได้ไม่เกิน 2 ไฟล์</span></label>
                     <input type="file" id="file_students" accept=".doc,.docx,.pdf,.xls,.xlsx" multiple class="form-input bg-purple-50/30 cursor-pointer" onchange="validateFiles(this, 'all')">
                     <div id="display_file_students" class="flex flex-wrap gap-2 mt-2"></div>
+                    </div>
+                    <div id="stuTypeWrap" class="hidden">
+                        <div class="block text-sm font-bold text-purple-800 mb-2">อีเมลและบทบาท <span class="text-red-500">*</span> <span class="text-xs text-gray-500 font-normal">(1 แถว = 1 คน สูงสุด 10 คน)</span></div>
+                        <div id="stuRows" class="space-y-2"></div>
+                        <button type="button" id="stuAddBtn" class="mt-2 text-sm font-bold text-purple-700 hover:text-purple-900" onclick="stuAddRow()"><i class="fas fa-plus-circle mr-1"></i> เพิ่มรายชื่อ</button>
+                    </div>
+                    <div id="stuLaterWrap" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 leading-relaxed">
+                        <i class="fas fa-hourglass-half mr-1"></i> ส่งคำขอได้โดยไม่ต้องแนบรายชื่อ เมื่อได้รายชื่อแล้ว กรุณาส่งคำขอ <b>"ขอเพิ่มรายชื่อ นศ./อาจารย์"</b> หรือส่งให้เจ้าหน้าที่ผู้รับผิดชอบรายวิชาโดยตรง
+                    </div>
                 </div>
 
                 <div id="boxUploadContent" class="hidden-step mb-5 p-5 bg-white border-2 border-emerald-200 rounded-xl">
@@ -1658,9 +1674,9 @@
 
                 if (detail === 'ขอเปิดรายวิชา') {
                     document.getElementById('boxUploadTQF').classList.add('visible-step');
-                    document.getElementById('boxUploadStudents').classList.add('visible-step');
+                    document.getElementById('boxUploadStudents').classList.add('visible-step'); stuLaterAllow(true);
                 } else if (detail === 'ขอเพิ่มรายชื่อ นศ./อาจารย์') {
-                    document.getElementById('boxUploadStudents').classList.add('visible-step');
+                    document.getElementById('boxUploadStudents').classList.add('visible-step'); stuLaterAllow(false);
                 } else if (detail === 'ขอเพิ่มเนื้อหา') {
                     document.getElementById('boxUploadContent').classList.add('visible-step');
                 } else if (detail === 'ขอเพิ่มแบบทดสอบ') {
@@ -1995,6 +2011,30 @@
 
     const toBase64 = f => new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(f); r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej; });
 
+    /* ===== รายชื่อนักศึกษา/อาจารย์: อัปโหลดไฟล์ / พิมพ์อีเมลเอง / ยังไม่มี (ส่งภายหลัง) ===== */
+    function stuMethod() { const r = document.querySelector('input[name="stuMethod"]:checked'); return r ? r.value : 'upload'; }
+    function stuMethodUI() {
+        const m = stuMethod();
+        document.getElementById('stuUploadWrap').classList.toggle('hidden', m !== 'upload');
+        document.getElementById('stuTypeWrap').classList.toggle('hidden', m !== 'type');
+        document.getElementById('stuLaterWrap').classList.toggle('hidden', m !== 'later');
+        if (m === 'type' && !document.querySelector('#stuRows .stu-row')) stuAddRow();
+    }
+    /** "ยังไม่มีรายชื่อ" ใช้ได้เฉพาะ ขอเปิดรายวิชา */
+    function stuLaterAllow(on) {
+        document.getElementById('stuLaterOpt').classList.toggle('hidden', !on);
+        if (!on && stuMethod() === 'later') document.querySelector('input[name="stuMethod"][value="upload"]').checked = true;
+        stuMethodUI();
+    }
+    function stuAddRow() {
+        const box = document.getElementById('stuRows'); if (box.querySelectorAll('.stu-row').length >= 10) return alert('พิมพ์ได้สูงสุด 10 คน ถ้ามากกว่านี้กรุณาเลือก "อัปโหลดไฟล์"');
+        const d = document.createElement('div'); d.className = 'stu-row flex flex-wrap sm:flex-nowrap gap-2 items-center';
+        d.innerHTML = '<input type="email" class="form-input stu-email flex-1" style="min-width:12rem" placeholder="เช่น somchai.jai@mahidol.ac.th" autocomplete="off">'
+            + '<select class="form-input stu-role" style="width:auto"><option value="">— บทบาท —</option><option>นักศึกษา</option><option>อาจารย์</option></select>'
+            + '<button type="button" class="text-red-500 hover:text-red-700 px-2" title="ลบแถวนี้" onclick="this.parentNode.remove(); if(!document.querySelector(\'#stuRows .stu-row\')) stuAddRow();"><i class="fas fa-times-circle"></i></button>';
+        box.appendChild(d);
+    }
+
     async function handleFormSubmit(e) {
         e.preventDefault();
         const sys = document.querySelector('input[name="system"]:checked')?.value;
@@ -2007,7 +2047,7 @@
 
         // ไฟล์แนบที่บังคับ (ช่องที่มีดาวแดงและแสดงอยู่) ต้องแนบอย่างน้อย 1 ไฟล์ ถึงจะส่งได้
         const needFiles = [['boxUploadTQF', 'file_tqf', 'ไฟล์ มม.3'], ['boxUploadStudents', 'file_students', 'รายชื่อนักศึกษา/อาจารย์']]
-            .filter(([box, id]) => document.getElementById(box).classList.contains('visible-step') && !(fileStore[id] && fileStore[id].length));
+            .filter(([box, id]) => document.getElementById(box).classList.contains('visible-step') && !(fileStore[id] && fileStore[id].length) && !(id === 'file_students' && stuMethod() !== 'upload'));
         if (needFiles.length) {
             document.getElementById(needFiles[0][0]).scrollIntoView({ behavior: 'smooth', block: 'center' });
             return alert('กรุณาแนบไฟล์ให้ครบก่อนส่งคำขอ\nยังไม่ได้แนบ: ' + needFiles.map(x => x[2]).join(', '));
@@ -2049,6 +2089,25 @@
             contentNote = '[แก้ไข: ' + et.join(' / ') + ']\n' + ed.value.trim();
         }
 
+        // รายชื่อนักศึกษา/อาจารย์: พิมพ์อีเมลเอง หรือ ยังไม่มีรายชื่อ (ส่งภายหลัง)
+        const stuOn = document.getElementById('boxUploadStudents').classList.contains('visible-step');
+        if (stuOn && stuMethod() !== 'upload') {
+            let stuNote = '';
+            if (stuMethod() === 'type') {
+                const rows = [...document.querySelectorAll('#stuRows .stu-row')].map(r => ({ el: r, email: r.querySelector('.stu-email').value.trim().toLowerCase(), role: r.querySelector('.stu-role').value })).filter(x => x.email || x.role);
+                const bad = m => { document.getElementById('stuTypeWrap').scrollIntoView({ behavior: 'smooth', block: 'center' }); alert(m); };
+                if (!rows.length) return bad('เลือก "พิมพ์อีเมลเอง" ไว้ กรุณากรอกอีเมลอย่างน้อย 1 คน');
+                for (const x of rows) {
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.email)) { x.el.querySelector('.stu-email').focus(); return bad('อีเมลไม่ถูกต้อง: ' + (x.email || '(ว่าง)')); }
+                    if (!x.role) { x.el.querySelector('.stu-role').focus(); return bad('กรุณาเลือกบทบาท (นักศึกษา/อาจารย์) ของ ' + x.email); }
+                }
+                const dup = rows.find((x, i) => rows.findIndex(y => y.email === x.email) !== i);
+                if (dup) return bad('อีเมลซ้ำ: ' + dup.email);
+                stuNote = '[รายชื่อ: พิมพ์อีเมล ' + rows.length + ' คน]\n' + rows.map((x, i) => (i + 1) + '. ' + x.email + ' (' + x.role + ')').join('\n');
+            } else stuNote = '[รายชื่อนักศึกษา/อาจารย์: ยังไม่มี จะส่งภายหลัง]';
+            contentNote = contentNote ? contentNote + '\n' + stuNote : stuNote;
+        }
+
         document.getElementById('loadingText').innerText = "กำลังอัปโหลดไฟล์และส่งคำขอ...";
         document.getElementById('loading').style.display = 'flex';
 
@@ -2058,7 +2117,8 @@
         const quizOn = document.getElementById('boxUploadQuiz').classList.contains('visible-step');
         for (const key in fileStore) {
             if (key.indexOf('file_qz_') === 0 && !quizOn) continue;
-            if (key === 'file_edit' && !document.getElementById('boxEdit').classList.contains('visible-step')) continue;   // ไฟล์ประกอบการแก้ไข ส่งเฉพาะเมื่อเลือก "ขอแก้ไขข้อมูล"   // ไฟล์ของแบบทดสอบส่งเฉพาะเมื่อเลือก "ขอเพิ่มแบบทดสอบ"
+            if (key === 'file_edit' && !document.getElementById('boxEdit').classList.contains('visible-step')) continue;
+            if (key === 'file_students' && stuMethod() !== 'upload') continue;   // ไม่ได้เลือกอัปโหลดไฟล์รายชื่อ → ไม่ส่งไฟล์ที่ค้างไว้   // ไฟล์ประกอบการแก้ไข ส่งเฉพาะเมื่อเลือก "ขอแก้ไขข้อมูล"   // ไฟล์ของแบบทดสอบส่งเฉพาะเมื่อเลือก "ขอเพิ่มแบบทดสอบ"
             const pre = key.indexOf('file_qz_') === 0 ? 'รายการ' + qzIndexOf(key.slice(8)) + '_' : '';
             for (let f of fileStore[key]) {
                 const b64 = await toBase64(f);
@@ -2090,6 +2150,7 @@
                 saveRequester(requesterInfo);
                 e.target.reset();
                 document.getElementById('contentLinkWrap').classList.add('hidden');
+                document.getElementById('stuRows').innerHTML = ''; stuMethodUI();
                 prefillRequester();
                 updateStepper();
                 fileStore = { 'file_tqf': [], 'file_students': [], 'file_content': [], 'file_quiz': [] };
