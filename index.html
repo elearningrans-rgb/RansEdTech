@@ -77,7 +77,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Kanit', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        body { font-family: 'Kanit', sans-serif; background-color: #eef3fa; color: #1e293b;
+            /* ลวดลายพื้นหลังทั้งโปรแกรม: เส้นโค้งน้ำเงิน-ส้ม + แสงฟุ้งมุมจอ + ลายตารางจาง (อยู่กับที่ขณะเลื่อนหน้า) */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='none'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M-100 610 C 300 390 700 730 1100 490 S 1500 270 1600 330' stroke='%232a62ab' stroke-opacity='.26' stroke-width='2.5'/%3E%3Cpath d='M-100 670 C 320 470 720 790 1120 550 S 1500 350 1600 400' stroke='%23f97316' stroke-opacity='.38' stroke-width='3'/%3E%3Cpath d='M-100 690 C 320 490 720 810 1120 570 S 1500 370 1600 420' stroke='%23fdba74' stroke-opacity='.35' stroke-width='1'/%3E%3Cpath d='M-100 740 C 340 560 740 860 1140 630 S 1500 440 1600 480' stroke='%232a62ab' stroke-opacity='.16' stroke-width='1.5'/%3E%3Cpath d='M-80 110 C 380 250 760 10 1180 170 S 1520 110 1600 50' stroke='%23f97316' stroke-opacity='.22' stroke-width='2'/%3E%3Cpath d='M-80 150 C 380 290 760 50 1180 210 S 1520 150 1600 90' stroke='%232a62ab' stroke-opacity='.14' stroke-width='1.2'/%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(900px 520px at 100% 0%, rgba(249,115,22,.16), transparent 60%),
+                radial-gradient(950px 560px at 0% 100%, rgba(42,98,171,.18), transparent 60%),
+                radial-gradient(600px 400px at 50% 55%, rgba(255,255,255,.55), transparent 70%),
+                linear-gradient(rgba(13,38,71,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(13,38,71,.045) 1px, transparent 1px);
+            background-size: 100% 100%, auto, auto, auto, 28px 28px, 28px 28px; background-attachment: fixed; }
         @media (min-width: 1100px) { main.container, nav > .container, .sf-main { max-width: min(96vw, 1760px) !important; } }
         .glass-card { background: rgba(255, 255, 255, 1); border-radius: 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
 
@@ -403,7 +410,7 @@
             main { max-width: 100% !important; }
             nav, #loading, .no-print, .mobile-nav, #topProgress, .ui-modal { display: none !important; }
             body { padding-bottom: 0 !important; }
-            body { background: #fff !important; }
+            body { background: #fff !important; background-image: none !important; }
             #tab-dashboard { display: block !important; }
             main { padding: 0 !important; max-width: 100% !important; }
             .glass-card { box-shadow: none !important; }
@@ -420,6 +427,31 @@
         .btn-primary { background: linear-gradient(135deg, #f97316, #fb923c) !important; border-color: #f97316 !important; color: #fff !important; box-shadow: 0 8px 18px -10px rgba(249,115,22,.9); }
         .btn-primary:hover { background: #ea580c !important; }
         .site-footer { background: #0b1f3f !important; } .site-footer .sf-copy { background: #081830 !important; }
+        /* ===== หน้าเข้าสู่ระบบ Admin / ผู้บริหาร (ธีมขาว) ===== */
+        .lg-wrap { position: relative; display: flex; justify-content: center; padding: 1.5rem .25rem; border-radius: 1.5rem; background: radial-gradient(520px 260px at 100% 0%, rgba(249,115,22,.10), transparent 60%), radial-gradient(560px 300px at 0% 100%, rgba(42,98,171,.12), transparent 60%); }
+        .lg-wrap::before { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background-image: linear-gradient(rgba(13,38,71,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(13,38,71,.045) 1px, transparent 1px); background-size: 28px 28px; -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%); mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%); }
+        .lg-card { position: relative; width: 100%; max-width: 420px; text-align: left; background: rgba(255,255,255,.92); border: 1px solid #e2e8f0; border-radius: 22px; padding: 1.75rem 1.75rem 1.4rem; box-shadow: 0 24px 60px -18px rgba(13,38,71,.22); overflow: hidden; }
+        .lg-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: linear-gradient(90deg, #123a73, #2a62ab 55%, #f97316); }
+        .lg-brand { display: flex; align-items: center; gap: .65rem; margin-bottom: 1rem; }
+        .lg-logo { flex: none; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, #123a73, #2a62ab); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.15rem; box-shadow: 0 8px 18px -6px rgba(29,79,148,.55); }
+        .lg-brand small { display: block; font-size: .66rem; letter-spacing: .16em; color: #2a62ab; } .lg-brand b { font-size: .85rem; color: #0d2647; }
+        .lg-badge { margin-left: auto; font-size: .7rem; color: #15803d; background: #dcfce7; border-radius: 999px; padding: .15rem .55rem; white-space: nowrap; }
+        .lg-h { margin: 0; font-size: 1.45rem; font-weight: 700; color: #0d2647; } .lg-h span { color: #f97316; }
+        .lg-sub { margin: .2rem 0 1.1rem; font-size: .85rem; color: #64748b; }
+        .lg-in { position: relative; margin-bottom: .9rem; }
+        .lg-in > i { position: absolute; left: .9rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: .85rem; pointer-events: none; }
+        .lg-in input { width: 100%; height: 46px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #0d2647; font-size: .95rem; padding: 0 2.8rem 0 2.5rem; outline: none; transition: border-color .15s, box-shadow .15s, background .15s; }
+        .lg-in input:focus { border-color: #2a62ab; background: #fff; box-shadow: 0 0 0 4px rgba(42,98,171,.12); }
+        .lg-in:focus-within > i { color: #2a62ab; }
+        .lg-eye { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 9px; color: #94a3b8; }
+        .lg-eye:hover { color: #2a62ab; background: #eff6ff; }
+        .lg-caps { font-size: .75rem; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: .3rem .6rem; margin: -.4rem 0 .75rem; }
+        .lg-err { font-size: .8rem; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: .45rem .65rem; margin-bottom: .75rem; }
+        .lg-btn { width: 100%; height: 48px; border: 0; border-radius: 12px; background: linear-gradient(90deg, #123a73, #2a62ab); color: #fff; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: .5rem; box-shadow: 0 12px 24px -10px rgba(29,79,148,.7); transition: transform .1s, filter .15s; }
+        .lg-btn:hover { filter: brightness(1.08); } .lg-btn:active { transform: translateY(1px); }
+        .lg-sec { margin-top: 1rem; border-top: 1px dashed #e2e8f0; padding-top: .75rem; display: grid; grid-template-columns: 1fr 1fr; gap: .35rem .6rem; font-size: .72rem; color: #64748b; }
+        .lg-sec i { color: #16a34a; margin-right: .3rem; width: .8rem; }
+        @media (max-width: 400px) { .lg-card { padding: 1.4rem 1.1rem 1.1rem; } .lg-sec { grid-template-columns: 1fr; } .lg-badge { display: none; } }
         #reqHero { background: radial-gradient(900px 400px at 90% -20%, rgba(249,115,22,.22), transparent 60%), linear-gradient(135deg, #123a73, #1d4f94 60%, #2a62ab); color: #fff; text-align: center; padding: 2.4rem 1rem 2.2rem; position: relative; overflow: hidden; }
         #reqHero h2 { font-size: 2rem; font-weight: 700; margin: 0; }
         /* ขั้นตอน 3 ขั้น (การ์ดกระจก + ไอคอนเรืองแสง + STEP + เส้นประ) — ย่อขนาดตามจอ แถวเดียวเสมอ */
@@ -579,7 +611,7 @@
         <div class="ui-modal-title"><i class="fas fa-key text-indigo-500 mr-1"></i> เปลี่ยนรหัสผ่าน</div>
         <div class="space-y-3 mt-3">
             <div><label class="field-label" for="pwOld">รหัสผ่านเดิม <span class="req">*</span></label><input id="pwOld" type="password" class="form-input" autocomplete="current-password"></div>
-            <div><label class="field-label" for="pwNew">รหัสผ่านใหม่ <span class="req">*</span> <span class="text-xs text-gray-400 font-normal">(อย่างน้อย 6 ตัวอักษร)</span></label><input id="pwNew" type="password" class="form-input" autocomplete="new-password"></div>
+            <div><label class="field-label" for="pwNew">รหัสผ่านใหม่ <span class="req">*</span> <span class="text-xs text-gray-400 font-normal">(อย่างน้อย 8 ตัว มีตัวอักษรและตัวเลข)</span></label><input id="pwNew" type="password" class="form-input" autocomplete="new-password"></div>
             <div><label class="field-label" for="pwNew2">ยืนยันรหัสผ่านใหม่ <span class="req">*</span></label><input id="pwNew2" type="password" class="form-input" autocomplete="new-password" onkeydown="if(event.key==='Enter') pwSave()"></div>
             <label class="inline-flex items-center gap-2 text-xs text-gray-500"><input type="checkbox" onchange="['pwOld','pwNew','pwNew2'].forEach(i=>document.getElementById(i).type=this.checked?'text':'password')"> แสดงรหัสผ่าน</label>
         </div>
@@ -920,17 +952,20 @@
 
     <!-- ===== ดัชบอร์ดผู้บริหาร ===== -->
     <div id="tab-dashboard" class="hidden">
-        <div id="execLoginArea" class="glass-card p-6 md:p-10 max-w-md mx-auto text-center">
-            <div class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-chart-pie"></i></div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">ดัชบอร์ดผู้บริหาร</h2>
-            <p class="text-sm text-gray-500 mb-6">กรุณาเข้าสู่ระบบเพื่อดูสรุปข้อมูลการใช้งาน</p>
-            <div class="text-left">
+        <div id="execLoginArea" class="lg-wrap">
+            <div class="lg-card">
+                <div class="lg-brand"><span class="lg-logo"><i class="fas fa-chart-pie"></i></span><span><small>SMART E-LEARNING RSON</small><b>ระบบจัดการคำขอใช้บริการ</b></span><span class="lg-badge"><i class="fas fa-lock"></i> HTTPS</span></div>
+                <h2 class="lg-h">แดชบอร์ด <span>ผู้บริหาร</span></h2>
+                <p class="lg-sub">กรุณาเข้าสู่ระบบเพื่อดูสรุปข้อมูลการใช้งาน</p>
                 <label class="field-label" for="execUser">ชื่อผู้ใช้</label>
-                <input type="text" id="execUser" class="form-input mb-4" placeholder="Username" autocomplete="username">
+                <div class="lg-in"><i class="fas fa-user"></i><input type="text" id="execUser" placeholder="Username" autocomplete="username" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter') document.getElementById('execPass').focus()"></div>
                 <label class="field-label" for="execPass">รหัสผ่าน</label>
-                <input type="password" id="execPass" class="form-input mb-6" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginExec()">
+                <div class="lg-in"><i class="fas fa-lock"></i><input type="password" id="execPass" placeholder="Password" autocomplete="current-password" onkeydown="lgCaps(event,'exec'); if(event.key==='Enter') loginExec()" onkeyup="lgCaps(event,'exec')"><button type="button" class="lg-eye" aria-label="แสดง/ซ่อนรหัสผ่าน" title="แสดง/ซ่อนรหัสผ่าน" onclick="lgEye(this)"><i class="fas fa-eye"></i></button></div>
+                <div id="execCaps" class="lg-caps hidden"><i class="fas fa-triangle-exclamation"></i> Caps Lock เปิดอยู่</div>
+                <div id="execErr" class="lg-err hidden" role="alert"></div>
+                <button onclick="loginExec()" class="lg-btn"><i class="fas fa-right-to-bracket"></i> เข้าสู่ระบบ</button>
+                <div class="lg-sec"><span><i class="fas fa-key"></i>รหัสผ่านเข้ารหัส (Hash)</span><span><i class="fas fa-user-lock"></i>ผิด 5 ครั้ง ล็อก 15 นาที</span><span><i class="fas fa-clock"></i>ไม่ใช้งาน 30 นาที ออกอัตโนมัติ</span><span><i class="fas fa-clipboard-list"></i>บันทึกทุกการเข้าสู่ระบบ</span></div>
             </div>
-            <button onclick="loginExec()" class="btn btn-primary btn-lg w-full"><i class="fas fa-right-to-bracket"></i> เข้าสู่ระบบ</button>
         </div>
 
         <div id="execDashboardArea" class="hidden">
@@ -1216,17 +1251,20 @@
     </div>
 
     <div id="tab-admin" class="glass-card p-6 md:p-10 hidden">
-        <div id="adminLoginArea" class="max-w-md mx-auto text-center">
-            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-user-shield"></i></div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">ผู้ดูแลระบบ (Admin)</h2>
-            <p class="text-sm text-gray-500 mb-6">เข้าสู่ระบบเพื่อจัดการคำขอและรายวิชา</p>
-            <div class="text-left">
+        <div id="adminLoginArea" class="lg-wrap">
+            <div class="lg-card">
+                <div class="lg-brand"><span class="lg-logo"><i class="fas fa-user-shield"></i></span><span><small>SMART E-LEARNING RSON</small><b>ระบบจัดการคำขอใช้บริการ</b></span><span class="lg-badge"><i class="fas fa-lock"></i> HTTPS</span></div>
+                <h2 class="lg-h">ผู้ดูแลระบบ <span>(Admin)</span></h2>
+                <p class="lg-sub">เข้าสู่ระบบเพื่อจัดการคำขอและรายวิชา</p>
                 <label class="field-label" for="adminUser">ชื่อผู้ใช้</label>
-                <input type="text" id="adminUser" class="form-input mb-4" placeholder="Username" autocomplete="username">
+                <div class="lg-in"><i class="fas fa-user"></i><input type="text" id="adminUser" placeholder="Username" autocomplete="username" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter') document.getElementById('adminPass').focus()"></div>
                 <label class="field-label" for="adminPass">รหัสผ่าน</label>
-                <input type="password" id="adminPass" class="form-input mb-6" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginAdmin()">
+                <div class="lg-in"><i class="fas fa-lock"></i><input type="password" id="adminPass" placeholder="Password" autocomplete="current-password" onkeydown="lgCaps(event,'admin'); if(event.key==='Enter') loginAdmin()" onkeyup="lgCaps(event,'admin')"><button type="button" class="lg-eye" aria-label="แสดง/ซ่อนรหัสผ่าน" title="แสดง/ซ่อนรหัสผ่าน" onclick="lgEye(this)"><i class="fas fa-eye"></i></button></div>
+                <div id="adminCaps" class="lg-caps hidden"><i class="fas fa-triangle-exclamation"></i> Caps Lock เปิดอยู่</div>
+                <div id="adminErr" class="lg-err hidden" role="alert"></div>
+                <button onclick="loginAdmin()" class="lg-btn"><i class="fas fa-right-to-bracket"></i> เข้าสู่ระบบ</button>
+                <div class="lg-sec"><span><i class="fas fa-key"></i>รหัสผ่านเข้ารหัส (Hash)</span><span><i class="fas fa-user-lock"></i>ผิด 5 ครั้ง ล็อก 15 นาที</span><span><i class="fas fa-clock"></i>ไม่ใช้งาน 30 นาที ออกอัตโนมัติ</span><span><i class="fas fa-clipboard-list"></i>บันทึกทุกการเข้าสู่ระบบ</span></div>
             </div>
-            <button onclick="loginAdmin()" class="btn btn-primary btn-lg w-full"><i class="fas fa-right-to-bracket"></i> เข้าสู่ระบบ</button>
         </div>
         <div id="adminDashboardArea" class="hidden">
             <div class="flex justify-between items-center gap-3 mb-6 flex-wrap">
@@ -1442,7 +1480,7 @@
                 <div class="sf-unit">หน่วยสื่อสารองค์กรและสารสนเทศ</div>
             </div>
         </div>
-        <div class="sf-author"><small>ผู้จัดทำ</small><span>ดร.มงคล แปลงกาย และทีม e-Learning</span></div>
+        <div class="sf-author"><small>ผู้จัดทำ</small><span>ดร.มงคล แปลงกาย</span></div>
     </div>
     <div class="sf-copy">© 2026 Ramathibodi School of Nursing, Mahidol University. All Rights Reserved.</div>
 </footer>
@@ -2330,14 +2368,41 @@
           .requesterCancel(reqId, trackTokenFor(window._trackEmail || ''));
     }
 
+    /* ===== หน้าเข้าสู่ระบบ: แสดง/ซ่อนรหัส, เตือน Caps Lock, ข้อความผิดพลาดในกล่อง ===== */
+    function lgEye(b) { const i = b.parentNode.querySelector('input'), show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.innerHTML = '<i class="fas fa-eye' + (show ? '-slash' : '') + '"></i>'; i.focus(); }
+    function lgCaps(e, k) { const el = document.getElementById(k + 'Caps'); if (el && e.getModifierState) el.classList.toggle('hidden', !e.getModifierState('CapsLock')); }
+    function lgErr(k, m) { const el = document.getElementById(k + 'Err'); if (!el) return m && alert(m); el.innerHTML = m ? '<i class="fas fa-circle-xmark mr-1"></i>' + ciEsc(m) : ''; el.classList.toggle('hidden', !m); }
+    /* ===== 🔒 ไม่มีการใช้งาน 30 นาที → ออกจากระบบอัตโนมัติ (ระหว่างใช้งานจะต่ออายุเซสชันที่ Server ให้ทุก 5 นาที) ===== */
+    const IDLE_MS = 30 * 60 * 1000, PING_MS = 5 * 60 * 1000;
+    let lgLastAct = Date.now(), lgLastPing = Date.now();
+    ['click', 'keydown', 'mousemove', 'touchstart', 'scroll', 'wheel'].forEach(ev => window.addEventListener(ev, () => {
+        lgLastAct = Date.now();
+        const t = adminToken || execToken;
+        if (t && isGAS && Date.now() - lgLastPing > PING_MS) {
+            lgLastPing = Date.now();
+            google.script.run.withSuccessHandler(() => {}).withFailureHandler(e => { if (isSessionErr(e) && (adminToken || execToken)) handleSessionExpired(); }).pingSession(t);
+        }
+    }, { passive: true, capture: true }));
+    setInterval(() => {
+        if ((adminToken || execToken) && Date.now() - lgLastAct > IDLE_MS) {
+            lgLastAct = Date.now();
+            document.querySelectorAll('.ui-modal.show').forEach(m => m.classList.remove('show'));
+            const isAdm = !!adminToken;
+            if (isAdm) { logoutAdmin(); switchTab('admin'); } else logoutExec();
+            lgErr(isAdm ? 'admin' : 'exec', 'ไม่มีการใช้งานเกิน 30 นาที ระบบออกจากระบบให้อัตโนมัติเพื่อความปลอดภัย กรุณาเข้าสู่ระบบใหม่');
+        }
+    }, 30000);
+
     function loginAdmin() {
-        const u = document.getElementById('adminUser').value, p = document.getElementById('adminPass').value;
+        const u = document.getElementById('adminUser').value.trim(), p = document.getElementById('adminPass').value;
+        lgErr('admin', '');
+        if (!u || !p) return lgErr('admin', 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
         if(isGAS){
             document.getElementById('loading').style.display = 'flex';
             google.script.run.withSuccessHandler(v => {
                 document.getElementById('loading').style.display = 'none';
-                if(v){ currentAdminUser = u; adminToken = String(v); admSetWho(); document.getElementById('adminLoginArea').style.display='none'; document.getElementById('adminDashboardArea').style.display='block'; loadAdminRequests(); } else alert('รหัสผิด');
-            }).withFailureHandler(srvErr(e => { document.getElementById('loading').style.display = 'none'; alert(e.message); })).verifyAdminCredentials(u,p);
+                if(v){ lgLastAct = lgLastPing = Date.now(); document.getElementById('adminPass').value = ''; currentAdminUser = u; adminToken = String(v); admSetWho(); document.getElementById('adminLoginArea').style.display='none'; document.getElementById('adminDashboardArea').style.display='block'; loadAdminRequests(); } else lgErr('admin', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }).withFailureHandler(e => { document.getElementById('loading').style.display = 'none'; lgErr('admin', (e && e.message) || String(e)); document.getElementById('adminPass').select(); }).verifyAdminCredentials(u,p);
         } else { currentAdminUser = u || 'admin1'; document.getElementById('adminLoginArea').style.display='none'; document.getElementById('adminDashboardArea').style.display='block'; }
     }
     // แสดงชื่อ admin ที่เข้าสู่ระบบ (ชื่อจริงจากแท็บ Admins เมื่อโหลดรายการคำขอแล้ว)
@@ -2375,7 +2440,8 @@
     function pwSave() {
         const o = document.getElementById('pwOld').value, n = document.getElementById('pwNew').value, n2 = document.getElementById('pwNew2').value;
         if (!o || !n || !n2) { alert('กรุณากรอกให้ครบทุกช่อง'); return; }
-        if (n.length < 6) { alert('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร'); return; }
+        if (n.length < 8) { alert('รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร'); return; }
+        if (!/[A-Za-z]/.test(n) || !/[0-9]/.test(n)) { alert('รหัสผ่านใหม่ต้องมีทั้งตัวอักษรภาษาอังกฤษและตัวเลข'); return; }
         if (n !== n2) { alert('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน'); return; }
         if (n === o) { alert('รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านเดิม'); return; }
         cmBusy(true);
@@ -4135,20 +4201,21 @@ table{width:100%;border-collapse:collapse;page-break-inside:auto}th,td{border:1p
 
     function loginExec() {
         const u = document.getElementById('execUser').value.trim();
-        const p = document.getElementById('execPass').value.trim();
-        if (!u || !p) return alert('กรุณากรอก Username และ Password');
+        const p = document.getElementById('execPass').value;
+        lgErr('exec', '');
+        if (!u || !p) return lgErr('exec', 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
 
         if (isGAS) {
             document.getElementById('loading').style.display = 'flex';
             google.script.run.withSuccessHandler(ok => {
                 document.getElementById('loading').style.display = 'none';
                 if (ok) {
-                    execToken = String(ok);
+                    execToken = String(ok); lgLastAct = lgLastPing = Date.now();
                     openDashboard();
                 } else {
-                    alert('Username หรือ Password ไม่ถูกต้อง');
+                    lgErr('exec', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
                 }
-            }).withFailureHandler(e => { document.getElementById('loading').style.display = 'none'; alert(e.message); }).verifyExecCredentials(u, p);
+            }).withFailureHandler(e => { document.getElementById('loading').style.display = 'none'; lgErr('exec', (e && e.message) || String(e)); document.getElementById('execPass').select(); }).verifyExecCredentials(u, p);
         } else {
             document.getElementById('execLoginArea').style.display = 'none';
             document.getElementById('execDashboardArea').classList.remove('hidden');
