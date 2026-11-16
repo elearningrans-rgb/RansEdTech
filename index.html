@@ -704,7 +704,7 @@
         <div class="top-tabs flex space-x-1 text-sm bg-indigo-900/40 p-1 rounded-xl flex-wrap">
             <button onclick="switchTab('request')" id="btn-request" class="tab-btn active px-4 py-2 rounded-lg font-bold"><i class="fas fa-file-pen"></i> ส่งคำขอ</button>
             <button onclick="switchTab('track')" id="btn-track" class="tab-btn px-4 py-2 rounded-lg font-bold"><i class="fas fa-magnifying-glass"></i> ติดตามสถานะ</button>
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-4 py-2 rounded-lg font-bold"><i class="fas fa-chart-pie"></i> ดัชบอร์ดผู้บริหาร</button>
+            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-4 py-2 rounded-lg font-bold"><i class="fas fa-chart-pie"></i> แดชบอร์ดผู้บริหาร</button>
             <button onclick="switchTab('admin')" id="btn-admin" class="tab-btn px-4 py-2 rounded-lg font-bold"><i class="fas fa-lock"></i> Admin</button>
         </div>
         <button type="button" id="menuToggle" class="menu-toggle" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="mobileMenu" onclick="toggleMenu()"><span class="bars"><span></span><span></span><span></span></span></button>
@@ -716,7 +716,7 @@
         <button type="button" id="mbtn-track" class="mtab-btn" role="menuitem" onclick="switchTab('track')"><i class="fas fa-magnifying-glass"></i><span>ติดตามสถานะ<small>ค้นหาด้วยอีเมลที่ใช้ส่งคำขอ</small></span><i class="fas fa-chevron-right chev"></i></button>
         <button type="button" id="mbtn-survey" class="mtab-btn mn-sv hidden" role="menuitem" onclick="svOpen()"><i class="fas fa-star"></i><span>ประเมินความพึงพอใจ<small>ใช้เวลาประมาณ 2 นาที</small></span><i class="fas fa-chevron-right chev"></i></button>
         <div class="mn-sep"></div>
-        <button type="button" id="mbtn-dashboard" class="mtab-btn" role="menuitem" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i><span>ดัชบอร์ดผู้บริหาร<small>สรุปผลการให้บริการ</small></span><i class="fas fa-chevron-right chev"></i></button>
+        <button type="button" id="mbtn-dashboard" class="mtab-btn" role="menuitem" onclick="switchTab('dashboard')"><i class="fas fa-chart-pie"></i><span>แดชบอร์ดผู้บริหาร<small>สรุปผลการให้บริการ</small></span><i class="fas fa-chevron-right chev"></i></button>
         <button type="button" id="mbtn-admin" class="mtab-btn" role="menuitem" onclick="switchTab('admin')"><i class="fas fa-lock"></i><span>Admin<small>สำหรับเจ้าหน้าที่</small></span><i class="fas fa-chevron-right chev"></i></button>
     </div>
 </nav>
@@ -951,7 +951,7 @@
         <div id="trackResult" class="space-y-4"></div>
     </div>
 
-    <!-- ===== ดัชบอร์ดผู้บริหาร ===== -->
+    <!-- ===== แดชบอร์ดผู้บริหาร ===== -->
     <div id="tab-dashboard" class="hidden">
         <div id="execLoginArea" class="lg-wrap">
             <div class="lg-card">
@@ -1271,7 +1271,7 @@
             <div class="flex justify-between items-center gap-3 mb-6 flex-wrap">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">ระบบจัดการหลังบ้าน (Admin)</h2>
-                    <div id="admWho" class="mt-1 inline-flex items-center gap-2 text-sm text-gray-600"><span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 inline-flex items-center justify-center"><i class="fas fa-user"></i></span><span>เข้าสู่ระบบโดย <b id="admWhoName" class="text-gray-800"></b> <span id="admWhoUser" class="text-gray-400"></span></span><button type="button" onclick="pwOpen()" class="ml-1 text-xs font-bold text-indigo-600 hover:underline whitespace-nowrap"><i class="fas fa-key mr-1"></i>เปลี่ยนรหัสผ่าน</button></div>
+                    <div id="admWho" class="mt-1 inline-flex items-center gap-2 text-sm text-gray-600"><span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 inline-flex items-center justify-center"><i class="fas fa-user"></i></span><span>เข้าสู่ระบบโดย <b id="admWhoName" class="text-gray-800"></b> <span id="admWhoUser" class="text-gray-400"></span></span><button type="button" onclick="pwOpen()" class="ml-1 text-xs font-bold text-indigo-600 hover:underline whitespace-nowrap"><i class="fas fa-key mr-1"></i>เปลี่ยนรหัสผ่าน</button><button type="button" onclick="lineLinkOpen()" class="ml-1 text-xs font-bold text-green-700 hover:underline whitespace-nowrap"><i class="fab fa-line mr-1"></i>ผูก LINE / Telegram</button></div>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="switchTab('dashboard')" class="btn btn-primary"><i class="fas fa-chart-pie"></i> สรุปภาพรวม</button>
@@ -1481,7 +1481,7 @@
                 <div class="sf-unit">หน่วยสื่อสารองค์กรและสารสนเทศ</div>
             </div>
         </div>
-        <div class="sf-author"><small>พัฒนาโดย</small><span>ดร.มงคล แปลงกาย และทีม e-Learning</span></div>
+        <div class="sf-author"><small>ผู้จัดทำ</small><span>ดร.มงคล แปลงกาย</span></div>
     </div>
     <div class="sf-copy">© 2026 Ramathibodi School of Nursing, Mahidol University. All Rights Reserved.</div>
 </footer>
@@ -1897,24 +1897,24 @@
     function step4Collect() {
         const l = document.getElementById('filterLevel').value, bach = isBachLevel(l), grad = isGradLevel(l);
         const v = { level: l, year: document.getElementById('filterYear').value, semester: document.getElementById('filterSemester').value };
-        if (!l) return 'กรุณาเลือกระดับการศึกษา (หัวข้อ 4.1)';
-        if (!v.year) return 'กรุณาเลือกปีการศึกษา (หัวข้อ 4.1)';
-        if (!v.semester) return 'กรุณาเลือกภาคเรียน (หัวข้อ 4.1)';
+        if (!l) return 'กรุณาเลือกระดับการศึกษา (หัวข้อ 2.1)';
+        if (!v.year) return 'กรุณาเลือกปีการศึกษา (หัวข้อ 2.1)';
+        if (!v.semester) return 'กรุณาเลือกภาคเรียน (หัวข้อ 2.1)';
         if (bach) {
             v.dept = document.getElementById('filterBachDept').value;
             v.yearLevel = document.getElementById('filterYearLevel').value;
             v.section = document.querySelector('input[name="studentSection"]:checked')?.value || '';
-            if (!v.dept) return 'กรุณาเลือกสาขาวิชาการพยาบาล (หัวข้อ 4.2)';
-            if (!v.yearLevel) return 'กรุณาเลือกชั้นปี (หัวข้อ 4.2)';
+            if (!v.dept) return 'กรุณาเลือกสาขาวิชาการพยาบาล (หัวข้อ 2.2)';
+            if (!v.yearLevel) return 'กรุณาเลือกชั้นปี (หัวข้อ 2.2)';
             if (!needSection(l)) v.section = '';
-            else if (!v.section) return 'กรุณาเลือกกลุ่มนักศึกษา (หัวข้อ 4.2)';
+            else if (!v.section) return 'กรุณาเลือกกลุ่มนักศึกษา (หัวข้อ 2.2)';
         }
         if (grad) {
             v.dept = document.getElementById('filterDept').value;
             v.programType = document.querySelector('input[name="programType"]:checked')?.value || '';
-            if (!v.dept) return 'กรุณาเลือกสาขาวิชาการพยาบาล (หัวข้อ 4.2)';
+            if (!v.dept) return 'กรุณาเลือกสาขาวิชาการพยาบาล (หัวข้อ 2.2)';
             if (!needProgramType(l)) v.programType = '';
-            else if (!v.programType) return 'กรุณาเลือกประเภทภาคการศึกษา (หัวข้อ 4.2)';
+            else if (!v.programType) return 'กรุณาเลือกประเภทภาคการศึกษา (หัวข้อ 2.2)';
         }
         return v;
     }
@@ -2464,6 +2464,17 @@
             alert(e.message || e);
         }).changeAdminPassword(o, n, adminToken);
     }
+    function lineLinkOpen() {
+        cmBusy(true);
+        google.script.run.withSuccessHandler(r => {
+            cmBusy(false);
+            uiAlert('ผูกบัญชี LINE / Telegram\nรหัสใช้ได้ภายใน 10 นาที (ใช้ได้ทั้ง 2 แอป)\n\nLINE' + (r.linked ? ' (ผูกแล้ว)' : '') + ' พิมพ์ในกลุ่ม:  ผูก ' + r.code + '\nTelegram' + (r.tgLinked ? ' (ผูกแล้ว)' : '') + ' พิมพ์ในกลุ่ม:  /link ' + r.code + '\n\nหลังผูกแล้ว กดปุ่ม “รับทราบ” ในข้อความคำขอที่ได้รับมอบหมายได้', 'info');
+        }).withFailureHandler(e => {
+            cmBusy(false);
+            if (isSessionErr(e)) { alert('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่'); logoutAdmin(); return; }
+            alert(e.message || e);
+        }).lineLinkCode(adminToken);
+    }
     function logoutAdmin() { currentAdminUser = ''; adminToken = ''; logoutExec(); document.getElementById('adminDashboardArea').style.display='none'; document.getElementById('adminLoginArea').style.display='block'; }
 
     /* ============ รายการคำขอ (Admin) ============
@@ -2584,7 +2595,7 @@
             let html = `<tr class="border-b st-row ${stCls} ${rowCls}">
                 <td class="p-3 text-xs whitespace-nowrap">${ciEsc(r.date)}<div class="text-gray-400">${ciEsc(r.reqId)}</div></td>
                 <td class="p-3"><div class="font-bold">${ciEsc(r.name)}</div><div class="text-xs text-gray-400">${ciEsc(r.email)}</div></td>
-                <td class="p-3" style="min-width:10rem"><div>${ciEsc(r.course === '-' ? '' : r.course) || '<span class="text-gray-400">ไม่ระบุรายวิชา</span>'}</div><div class="text-xs text-indigo-600 font-bold">${ciEsc(r.system)}${r.detail && r.detail !== '-' ? ' · ' + ciEsc(r.detail) : ''}</div>${rmLevelText(r) ? `<div class="text-xs text-gray-500 mt-0.5">${ciEsc(rmLevelText(r))}</div>` : ''}${rmMainExtras(r)}${r.status === 'เสร็จสิ้น' ? `<div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">${r.confirm ? `<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-bold"><i class="fas fa-circle-check mr-1"></i>ผู้ขอ${ciEsc(r.confirm)}</span>` : `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"><i class="fas fa-hourglass-half mr-1"></i>รอผู้ขอตรวจสอบ</span>`}${r.checkLink ? `<a href="${ciEsc(r.checkLink)}" target="_blank" class="text-blue-600 hover:underline"><i class="fas fa-link mr-0.5"></i>ลิงก์ที่ส่ง</a>` : ''}</div>` : ''}${r.status === 'ขอแก้ไข' && r.fixNote ? `<div class="mt-1.5 p-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800 whitespace-pre-wrap"><b><i class="fas fa-screwdriver-wrench mr-1"></i>ผู้ขอแจ้งแก้ไข</b>\n${ciEsc(fxLatest(r.fixNote))}</div>` : ''}</td>
+                <td class="p-3" style="min-width:10rem"><div>${ciEsc(r.course === '-' ? '' : r.course) || '<span class="text-gray-400">ไม่ระบุรายวิชา</span>'}</div><div class="text-xs text-indigo-600 font-bold">${ciEsc(r.system)}${r.detail && r.detail !== '-' ? ' · ' + ciEsc(r.detail) : ''}</div>${rmLevelText(r) ? `<div class="text-xs text-gray-500 mt-0.5">${ciEsc(rmLevelText(r))}</div>` : ''}${rmMainExtras(r)}${r.status === 'เสร็จสิ้น' ? `<div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">${r.confirm ? `<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-bold"><i class="fas fa-circle-check mr-1"></i>ผู้ขอ${ciEsc(r.confirm)}</span>` : `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"><i class="fas fa-hourglass-half mr-1"></i>รอผู้ขอตรวจสอบ</span>`}${r.checkLink ? `<a href="${ciEsc(r.checkLink)}" target="_blank" class="text-blue-600 hover:underline"><i class="fas fa-link mr-0.5"></i>ลิงก์ที่ส่ง</a>` : ''}</div>` : ''}${r.status === 'ขอแก้ไข' && r.fixNote ? `<div class="mt-1.5 p-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800 whitespace-pre-wrap"><b><i class="fas fa-screwdriver-wrench mr-1"></i>ผู้ขอแจ้งแก้ไข</b>\n${ciEsc(fxLatest(r.fixNote))}</div>` : ''}${r.ack ? `<div class="mt-1 text-xs text-emerald-700"><i class="fab fa-line mr-1"></i>รับทราบ: ${ciEsc(r.ack)}</div>` : ''}</td>
                 <td class="p-3 whitespace-nowrap">${rmSlaBadge(r)}<div class="text-xs text-gray-400 mt-0.5">${ciEsc(r.due)} (${r.slaDays} วันทำการ)</div></td>
                 <td class="p-2" style="min-width:11rem">
                     <div class="flex items-center justify-between gap-2 mb-1.5"><span class="st-pill">${ciEsc(r.status || 'รออนุมัติ')}</span>${r.status !== 'ยกเลิก' ? `<span class="text-xs font-bold" style="color:var(--st-fg)">${pct}%</span>` : ''}</div>
@@ -2888,13 +2899,13 @@
         const R = ' <span class="text-red-500">*</span>';
         const opts = (list, v, ph, num) => { v = String(v || ''); const extra = v && !list.includes(v) ? `<option value="${ciEsc(v)}" selected>⚠ ${ciEsc(v)} (ไม่ตรงรายการ)</option>` : '';
             return `<option value="">${ph}</option>` + extra + list.map((x, i) => `<option value="${ciEsc(x)}"${x === v ? ' selected' : ''}>${num ? (i + 1) + '. ' : ''}${ciEsc(x)}</option>`).join(''); };
-        if (isBachLevel(l)) return `<div class="p-3 rounded-xl bg-sky-50 border border-sky-100"><div class="text-xs font-bold text-sky-800 mb-2"><i class="fas fa-user-graduate mr-1"></i> 4.2 ข้อมูลสำหรับนักศึกษาปริญญาตรี</div>
+        if (isBachLevel(l)) return `<div class="p-3 rounded-xl bg-sky-50 border border-sky-100"><div class="text-xs font-bold text-sky-800 mb-2"><i class="fas fa-user-graduate mr-1"></i> 2.2 ข้อมูลสำหรับนักศึกษาปริญญาตรี</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fld('สาขาวิชาการพยาบาล' + R, `<select id="cmE_dept" class="cm-in">${opts(BACH_DEPTS, dept, '-- เลือกสาขาวิชา --', true)}</select>`)}
             ${fld('ชั้นปี' + R, `<select id="cmE_yl" class="cm-in"><option value="">-- เลือกชั้นปี --</option>${YEAR_LEVELS.map(y => `<option value="${y}"${String(yl || '') === y ? ' selected' : ''}>ปีที่ ${y}</option>`).join('')}</select>`)}</div></div>`;
-        if (isGradLevel(l)) return `<div class="p-3 rounded-xl bg-violet-50 border border-violet-100"><div class="text-xs font-bold text-violet-800 mb-2"><i class="fas fa-user-tie mr-1"></i> 4.2 ข้อมูลสำหรับนักศึกษาบัณฑิตศึกษา</div>
+        if (isGradLevel(l)) return `<div class="p-3 rounded-xl bg-violet-50 border border-violet-100"><div class="text-xs font-bold text-violet-800 mb-2"><i class="fas fa-user-tie mr-1"></i> 2.2 ข้อมูลสำหรับนักศึกษาบัณฑิตศึกษา</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fld('สาขาวิชาการพยาบาล ' + (/^ปริญญาเอก/.test(l) ? 'ป.เอก' : 'ป.โท') + R, `<select id="cmE_dept" class="cm-in">${opts(MASTER_DEPTS, dept, '-- เลือกสาขาวิชา --')}</select>`)}
             ${needProgramType(l) ? fld('ประเภทภาคการศึกษา', `<select id="cmE_pt" class="cm-in">${opts(PROGRAM_TYPES, pt, 'ใช้ได้ทั้งภาคปกติและภาคพิเศษ')}</select>`) : ''}</div></div>`;
-        if (!l) return '<div class="text-xs text-gray-400 p-3 rounded-xl bg-gray-50 border border-dashed">4.2 จะแสดงหลังเลือกระดับการศึกษา</div>';
+        if (!l) return '<div class="text-xs text-gray-400 p-3 rounded-xl bg-gray-50 border border-dashed">2.2 จะแสดงหลังเลือกระดับการศึกษา</div>';
         return `<div class="p-3 rounded-xl bg-gray-50 border">${fld('สาขาวิชา (ถ้ามี)', `<input id="cmE_dept" class="cm-in" value="${ciEsc(dept)}" placeholder="สาขาวิชา" list="cmDeptList">`)}</div>`;
     }
     function cmLevelChange() {
@@ -2912,7 +2923,7 @@
         if (!/^[12]$/.test(d.semester || '')) return 'ภาคเรียนต้องเป็น 1 หรือ 2';
         const list = cmDeptListFor(d.level);
         if (list && !d.dept) return 'ไม่ได้ระบุสาขาวิชา';
-        if (list && !list.includes(d.dept)) return 'สาขาวิชาไม่ตรงกับรายการในหัวข้อ 4.2 "' + d.dept + '"';
+        if (list && !list.includes(d.dept)) return 'สาขาวิชาไม่ตรงกับรายการในหัวข้อ 2.2 "' + d.dept + '"';
         if (isBachLevel(d.level) && !YEAR_LEVELS.includes(String(d.yearLevel || ''))) return 'ปริญญาตรีต้องระบุชั้นปี 1–4';
         if (d.programType && (!needProgramType(d.level) || !PROGRAM_TYPES.includes(d.programType))) return 'ประเภทภาคการศึกษาใช้เฉพาะ ป.โท และต้องเป็น ภาคปกติ หรือ ภาคพิเศษ';
         if (!d.id) return 'ไม่มีรหัสวิชา';
@@ -2937,15 +2948,15 @@
                 <div class="font-bold ${isNew ? 'text-green-700' : 'text-amber-700'}"><i class="fas ${isNew ? 'fa-plus' : 'fa-pen'} mr-1"></i> ${isNew ? 'เพิ่มรายวิชาใหม่' : 'แก้ไขรายวิชา ' + ciEsc(d.id)}</div>
                 <div id="cmAutoSheet" class="text-xs text-gray-500">${isNew ? '' : 'แท็บข้อมูล: <b>' + ciEsc(d.sheetName) + '</b>'}</div>
             </div>
-            <p class="text-xs text-gray-500 mb-3">กรอกตามหัวข้อเดียวกับ "4. เลือกรายวิชาเป้าหมาย" ในฟอร์มส่งคำขอ เพื่อให้ผู้ขอค้นหาวิชานี้เจอ</p>
-            ${head('4.1 ข้อมูลหลักสูตร', 'fa-graduation-cap')}
+            <p class="text-xs text-gray-500 mb-3">กรอกตามหัวข้อเดียวกับ "2. เลือกรายวิชาเป้าหมาย" ในฟอร์มส่งคำขอ เพื่อให้ผู้ขอค้นหาวิชานี้เจอ</p>
+            ${head('2.1 ข้อมูลหลักสูตร', 'fa-graduation-cap')}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                 ${fld('ระดับการศึกษา' + R, sel('level', d.level, lvOpts, 'onchange="cmLevelChange()"'))}
                 ${fld('ปีการศึกษา' + R, sel('year', d.year, [['', '-- เลือกปีการศึกษา --']].concat(yearOptions().map(v => [v, v]))))}
                 ${fld('ภาคเรียน' + R, sel('sem', d.semester, [['', '-- เลือกภาคเรียน --'], ['1', 'ภาคเรียนที่ 1'], ['2', 'ภาคเรียนที่ 2']]))}
             </div>
             <div id="cmE_42" class="mb-3">${cm42Html(d.level, d.dept, d.yearLevel, d.programType)}</div>
-            ${head('4.3 รายวิชา', 'fa-book')}
+            ${head('2.3 รายวิชา', 'fa-book')}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 ${fld('รหัสวิชา' + R, inp('id', d.id, 'เช่น RANS 101'))}
                 ${fld('ชื่อวิชา' + R, inp('name', d.name, 'ชื่อรายวิชา'), 'sm:col-span-2')}
@@ -4792,7 +4803,7 @@ table{width:100%;border-collapse:collapse;page-break-inside:auto}th,td{border:1p
     /* ============ ดาวน์โหลด Excel ============ */
     function exportDashboardExcel() {
         const d = lastDashboardData;
-        if (!d) return alert('ยังไม่มีข้อมูล กรุณารอโหลดดัชบอร์ดก่อน');
+        if (!d) return alert('ยังไม่มีข้อมูล กรุณารอโหลดแดชบอร์ดก่อน');
         const now = new Date();
         const stamp = now.toLocaleString('th-TH');
         const filterText = csFilterText();
