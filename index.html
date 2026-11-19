@@ -1481,7 +1481,7 @@
                 <div class="sf-unit">หน่วยสื่อสารองค์กรและสารสนเทศ</div>
             </div>
         </div>
-        <div class="sf-author"><small>พัฒนาโดย</small><span>ดร.มงคล แปลงกาย และทีม e-Learning</span></div>
+        <div class="sf-author"><small>ผู้จัดทำ</small><span>ดร.มงคล แปลงกาย</span></div>
     </div>
     <div class="sf-copy">© 2026 Ramathibodi School of Nursing, Mahidol University. All Rights Reserved.</div>
 </footer>
@@ -1981,7 +1981,7 @@
             <div class="flex items-center justify-between gap-2 mb-3"><div class="qz-num font-bold text-amber-800"></div>
                 <button type="button" class="qz-del text-xs text-red-600 hover:underline" onclick="qzDel(${u})"><i class="fas fa-trash-can mr-1"></i>ลบรายการนี้</button></div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                ${fld('รูปแบบ' + R, `<select class="form-input qz-type" onchange="qzTypeChange(${u})">${Object.keys(QZ_TYPES).map(k => `<option value="${k}">${QZ_TYPES[k]}</option>`).join('')}</select>`, 'sm:col-span-2')}
+                ${fld('รูปแบบ' + R + ' <span class="font-normal text-gray-400">(เลือก 1 รูปแบบ)</span>', `<input type="hidden" class="qz-type" value="quiz"><div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${Object.keys(QZ_TYPES).map((k, i) => `<label class="qz-tcard flex items-start gap-2 p-3 rounded-xl border-2 cursor-pointer bg-white transition ${i ? 'border-gray-200 hover:border-amber-300' : 'border-amber-500 bg-amber-50'}"><input type="radio" name="qzt_${u}" value="${k}" ${i ? '' : 'checked'} class="mt-1 accent-amber-600" onchange="const w=this.closest('.qz-item');w.querySelector('.qz-type').value=this.value;w.querySelectorAll('.qz-tcard').forEach(c=>{const on=c.contains(this);c.classList.toggle('border-amber-500',on);c.classList.toggle('bg-amber-50',on);c.classList.toggle('border-gray-200',!on)});qzTypeChange(${u})"><span class="text-sm leading-snug"><b class="block text-amber-800">${QZ_TYPES[k].split(': ')[0]}</b>${QZ_TYPES[k].split(': ')[1]}</span></label>`).join('')}</div>`, 'sm:col-span-2')}
                 ${fld('หัวข้อ (ตาม มคอ.)' + R, '<input type="text" class="form-input qz-topic" placeholder="เช่น บทที่ 3 การประเมินภาวะสุขภาพ">')}
                 ${fld('ชื่อแบบทดสอบ / ชื่องาน' + R, '<input type="text" class="form-input qz-name" placeholder="เช่น แบบทดสอบท้ายบทที่ 3">')}
             </div>
